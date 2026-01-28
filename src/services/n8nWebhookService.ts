@@ -3,7 +3,7 @@
 import { ResumeData } from '@/lib/resumeTypes';
 
 // n8n webhook URL - exposed via ngrok
-let RESUME_WEBHOOK_URL: string | null = 'http://localhost:5678/webhook-test/get-resume';
+let RESUME_WEBHOOK_URL: string | null = 'http://localhost:5678/webhook-test/upload-resume';
 
 export const setResumeWebhookUrl = (url: string) => {
   RESUME_WEBHOOK_URL = url;
