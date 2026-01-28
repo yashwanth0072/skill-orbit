@@ -220,6 +220,7 @@ export default function Events() {
           setSelectedEvent(null);
         }}
         onComplete={handleAssessmentComplete}
+        skills={skills}
       />
     </motion.div>
   );
