@@ -1,6 +1,7 @@
 import { Link, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useApp } from '@/contexts/AppContext';
+import { useSidebarCollapsed } from '@/contexts/SidebarContext';
 import {
   LayoutDashboard,
   Target,
@@ -17,7 +18,6 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { useState } from 'react';
 
 const candidateNavItems = [
   { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard' },
@@ -38,7 +38,7 @@ const recruiterNavItems = [
 export function Sidebar() {
   const location = useLocation();
   const { userRole, setIsAuthenticated, setUserRole } = useApp();
-  const [collapsed, setCollapsed] = useState(false);
+  const { collapsed, toggleCollapsed } = useSidebarCollapsed();
 
   const navItems = userRole === 'candidate' ? candidateNavItems : recruiterNavItems;
 
@@ -114,7 +114,7 @@ export function Sidebar() {
         <Button
           variant="ghost"
           size="icon"
-          onClick={() => setCollapsed(!collapsed)}
+          onClick={toggleCollapsed}
           className="w-full"
         >
           {collapsed ? (

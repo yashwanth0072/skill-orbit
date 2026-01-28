@@ -4,9 +4,11 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AppProvider, useApp } from "./contexts/AppContext";
+import { SidebarProvider } from "./contexts/SidebarContext";
 
 // Pages
 import Landing from "./pages/Landing";
+import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 
 // Candidate Pages
@@ -42,7 +44,7 @@ function AppRoutes() {
 
   return (
     <Routes>
-      {/* Public Route */}
+      {/* Public Routes */}
       <Route
         path="/"
         element={
@@ -50,6 +52,16 @@ function AppRoutes() {
             <Navigate to={userRole === 'candidate' ? '/dashboard' : '/recruiter'} replace />
           ) : (
             <Landing />
+          )
+        }
+      />
+      <Route
+        path="/auth"
+        element={
+          isAuthenticated ? (
+            <Navigate to={userRole === 'candidate' ? '/dashboard' : '/recruiter'} replace />
+          ) : (
+            <Auth />
           )
         }
       />
@@ -87,9 +99,11 @@ const App = () => (
     <TooltipProvider>
       <BrowserRouter>
         <AppProvider>
-          <Toaster />
-          <Sonner />
-          <AppRoutes />
+          <SidebarProvider>
+            <Toaster />
+            <Sonner />
+            <AppRoutes />
+          </SidebarProvider>
         </AppProvider>
       </BrowserRouter>
     </TooltipProvider>

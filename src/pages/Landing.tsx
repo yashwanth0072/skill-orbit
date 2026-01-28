@@ -48,7 +48,11 @@ export default function Landing() {
   const navigate = useNavigate();
   const { setUserRole, setIsAuthenticated } = useApp();
 
-  const handleGetStarted = (role: 'candidate' | 'recruiter') => {
+  const handleGetStarted = () => {
+    navigate('/auth');
+  };
+
+  const handleRoleStart = (role: 'candidate' | 'recruiter') => {
     setUserRole(role);
     setIsAuthenticated(true);
     navigate(role === 'candidate' ? '/dashboard' : '/recruiter');
@@ -68,13 +72,13 @@ export default function Landing() {
             </Link>
 
             <div className="flex items-center gap-4">
-              <Button variant="ghost" onClick={() => handleGetStarted('candidate')}>
+              <Button variant="ghost" onClick={() => handleRoleStart('candidate')}>
                 For Candidates
               </Button>
-              <Button variant="ghost" onClick={() => handleGetStarted('recruiter')}>
+              <Button variant="ghost" onClick={() => handleRoleStart('recruiter')}>
                 For Recruiters
               </Button>
-              <Button onClick={() => handleGetStarted('candidate')} className="gap-2">
+              <Button onClick={handleGetStarted} className="gap-2">
                 Get Started <ArrowRight className="w-4 h-4" />
               </Button>
             </div>
@@ -144,7 +148,7 @@ export default function Landing() {
             >
               <Button
                 size="lg"
-                onClick={() => handleGetStarted('candidate')}
+                onClick={() => handleRoleStart('candidate')}
                 className="px-8 py-6 text-lg gap-2"
               >
                 Start as Candidate <ArrowRight className="w-5 h-5" />
@@ -152,7 +156,7 @@ export default function Landing() {
               <Button
                 variant="outline"
                 size="lg"
-                onClick={() => handleGetStarted('recruiter')}
+                onClick={() => handleRoleStart('recruiter')}
                 className="px-8 py-6 text-lg gap-2"
               >
                 <Users className="w-5 h-5" /> I'm a Recruiter
@@ -269,7 +273,7 @@ export default function Landing() {
               <Button
                 size="lg"
                 variant="secondary"
-                onClick={() => handleGetStarted('candidate')}
+                onClick={handleGetStarted}
                 className="px-8 py-6 text-lg gap-2 bg-background hover:bg-background/90"
               >
                 <CheckCircle className="w-5 h-5" /> Get Started Free
