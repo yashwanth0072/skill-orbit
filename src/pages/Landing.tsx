@@ -54,6 +54,7 @@ export default function Landing() {
 
   const handleRoleStart = (role: 'candidate' | 'recruiter') => {
     setUserRole(role);
+    localStorage.setItem('userRole', role);
     navigate('/auth');
   };
 
