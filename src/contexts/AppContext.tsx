@@ -316,7 +316,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
       id: app.candidateId || `candidate-${app.id}`,
       name: app.status === 'applied' ? 'New Applicant' : 'Matched Candidate', // Placeholder
       email: 'applicant@example.com',
-      skills: app.jobRole.requiredSkills.map(s => ({ ...s, score: 75 })), // Mock skills if not stored
+      skills: app.jobRole.requiredSkills.map(s => ({
+        id: s.skillId,
+        name: s.name,
+        score: 75,
+        category: 'General',
+        maxScore: 100,
+        targetScore: s.minScore,
+        status: 'assessed'
+      })),
       readinessIndex: 80,
       matchPercentage: app.matchPercentage,
       acceptedAt: app.createdAt,

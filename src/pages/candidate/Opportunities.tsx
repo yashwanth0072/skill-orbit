@@ -128,7 +128,7 @@ export default function Opportunities() {
                     </span>
                     <span className="flex items-center gap-1.5">
                       <Calendar className="w-4 h-4" />
-                      {role.type}
+                      {role.postedAt}
                     </span>
                   </div>
                 </div>
@@ -168,7 +168,7 @@ export default function Opportunities() {
                       <div key={skill.name} className="flex items-center justify-between">
                         <span className="text-sm text-muted-foreground">{skill.name}</span>
                         <div className="flex items-center gap-2">
-                          <span className="text-xs text-muted-foreground">Target: {skill.targetScore}%</span>
+                          <span className="text-xs text-muted-foreground">Target: {skill.minScore}%</span>
                         </div>
                       </div>
                     ))}

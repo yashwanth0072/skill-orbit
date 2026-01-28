@@ -24,6 +24,7 @@ import RecruiterDashboard from "./pages/recruiter/Dashboard";
 import Candidates from "./pages/recruiter/Candidates";
 import JobRoles from "./pages/recruiter/JobRoles";
 import RecruiterEvents from "./pages/recruiter/Events";
+import RecruiterSettings from "./pages/recruiter/Settings";
 
 // Layout
 import { DashboardLayout } from "./components/layout/DashboardLayout";
