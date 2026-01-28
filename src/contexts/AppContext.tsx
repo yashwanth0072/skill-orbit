@@ -3,7 +3,6 @@ import {
   Skill,
   Opportunity,
   Event,
-  mockSkills,
   mockOpportunities,
   mockEvents,
   mockCandidates,
@@ -51,7 +50,8 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 export function AppProvider({ children }: { children: ReactNode }) {
   const [userRole, setUserRole] = useState<UserRole>('candidate');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [skills, setSkills] = useState<Skill[]>(mockSkills);
+  // Start with empty skills - populated after resume upload
+  const [skills, setSkills] = useState<Skill[]>([]);
   const [opportunities, setOpportunities] = useState<Opportunity[]>(mockOpportunities);
   const [events, setEvents] = useState<Event[]>(mockEvents);
   const [candidates, setCandidates] = useState<Candidate[]>(mockCandidates);
