@@ -8,6 +8,7 @@ export interface Skill {
   maxScore: number;
   targetScore: number;
   assessedAt?: string;
+  status?: 'pending' | 'assessed';
 }
 
 export interface SkillGap {

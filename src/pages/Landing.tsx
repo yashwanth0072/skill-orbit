@@ -54,8 +54,7 @@ export default function Landing() {
 
   const handleRoleStart = (role: 'candidate' | 'recruiter') => {
     setUserRole(role);
-    setIsAuthenticated(true);
-    navigate(role === 'candidate' ? '/dashboard' : '/recruiter');
+    navigate('/auth');
   };
 
   return (
@@ -136,7 +135,7 @@ export default function Landing() {
               transition={{ duration: 0.6, delay: 0.2 }}
               className="text-xl text-muted-foreground mb-10 max-w-2xl mx-auto"
             >
-              A consent-driven platform where your skills come first. Get assessed, understand your gaps, 
+              A consent-driven platform where your skills come first. Get assessed, understand your gaps,
               and get notified when you're eligible for roles—all on your terms.
             </motion.p>
 

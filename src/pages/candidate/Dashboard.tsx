@@ -7,6 +7,7 @@ import { SkillRadar } from '@/components/ui/SkillRadar';
 import { SkillBar } from '@/components/ui/SkillBar';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { ResumeUpload } from '@/components/ResumeUpload';
+import { PendingAssessments } from '@/components/PendingAssessments';
 import { JobApplicationNotifications } from '@/components/JobApplicationNotifications';
 import { calculateReadinessIndex, mockSkillGaps, Skill } from '@/lib/mockData';
 import { ResumeData } from '@/lib/resumeTypes';
@@ -47,14 +48,16 @@ export default function CandidateDashboard() {
 
   const handleResumeProcessed = (resumeData: ResumeData) => {
     if (resumeData.extractedSkills && resumeData.extractedSkills.length > 0) {
+      // Replace skills entirely with resume data for fresh start
       const newSkills: Skill[] = resumeData.extractedSkills.map((extracted, index) => ({
         id: `resume-${index + 1}`,
         name: extracted.name,
         category: extracted.category,
-        score: Math.min(100, 50 + (extracted.yearsOfExperience || 1) * 10),
+        score: 0,
         maxScore: 100,
         targetScore: 80,
-        assessedAt: new Date().toISOString().split('T')[0],
+        assessedAt: undefined,
+        status: 'pending' // Mark as pending assessment
       }));
 
       // Replace skills entirely with resume data for fresh start
@@ -82,7 +85,7 @@ export default function CandidateDashboard() {
             {hasSkills ? 'Welcome Back!' : 'Get Started'}
           </h1>
           <p className="text-muted-foreground mt-1">
-            {hasSkills 
+            {hasSkills
               ? "Here's your skill overview and latest opportunities."
               : 'Upload your resume to see your skill analysis and opportunities.'}
           </p>
@@ -100,6 +103,13 @@ export default function CandidateDashboard() {
       <motion.div variants={itemVariants}>
         <ResumeUpload onResumeProcessed={handleResumeProcessed} />
       </motion.div>
+
+      {/* Pending Assessments */}
+      {hasSkills && (
+        <motion.div variants={itemVariants}>
+          <PendingAssessments skills={skills} />
+        </motion.div>
+      )}
 
       {/* Stats Grid - Only show after skills are loaded */}
       {hasSkills && (
@@ -160,9 +170,8 @@ export default function CandidateDashboard() {
                   </p>
                 </div>
                 <div
-                  className={`w-12 h-12 rounded-xl flex items-center justify-center ${
-                    settings.reverseHiringEnabled ? 'bg-success/10' : 'bg-muted'
-                  }`}
+                  className={`w-12 h-12 rounded-xl flex items-center justify-center ${settings.reverseHiringEnabled ? 'bg-success/10' : 'bg-muted'
+                    }`}
                 >
                   {settings.reverseHiringEnabled ? (
                     <CheckCircle className="w-6 h-6 text-success" />
@@ -280,13 +289,12 @@ export default function CandidateDashboard() {
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-1">
                             <span
-                              className={`text-xs font-medium px-2 py-0.5 rounded-full ${
-                                event.type === 'workshop'
-                                  ? 'bg-info/10 text-info'
-                                  : event.type === 'bootcamp'
+                              className={`text-xs font-medium px-2 py-0.5 rounded-full ${event.type === 'workshop'
+                                ? 'bg-info/10 text-info'
+                                : event.type === 'bootcamp'
                                   ? 'bg-success/10 text-success'
                                   : 'bg-accent/10 text-accent-foreground'
-                              }`}
+                                }`}
                             >
                               {event.type}
                             </span>

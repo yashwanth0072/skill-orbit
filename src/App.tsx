@@ -30,18 +30,36 @@ import { DashboardLayout } from "./components/layout/DashboardLayout";
 
 const queryClient = new QueryClient();
 
+import { Loader2 } from "lucide-react";
+
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated } = useApp();
-  
+  const { isAuthenticated, isLoading } = useApp();
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
   if (!isAuthenticated) {
     return <Navigate to="/" replace />;
   }
-  
+
   return <>{children}</>;
 }
 
 function AppRoutes() {
-  const { isAuthenticated, userRole } = useApp();
+  const { isAuthenticated, userRole, isLoading } = useApp();
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <Routes>
@@ -81,7 +99,7 @@ function AppRoutes() {
         <Route path="/opportunities" element={<Opportunities />} />
         <Route path="/events" element={<Events />} />
         <Route path="/settings" element={<Settings />} />
-        
+
         {/* Recruiter Routes */}
         <Route path="/recruiter" element={<RecruiterDashboard />} />
         <Route path="/recruiter/jobs" element={<JobRoles />} />

@@ -14,11 +14,12 @@ export default function Auth() {
   const [selectedRole, setSelectedRole] = useState<'candidate' | 'recruiter' | null>(null);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
-  const handleContinue = () => {
+  const handleContinue = async () => {
     if (selectedRole) {
       setUserRole(selectedRole);
-      setIsAuthenticated(true);
-      navigate(selectedRole === 'candidate' ? '/dashboard' : '/recruiter');
+      // Persist role preference before redirecting
+      localStorage.setItem('userRole', selectedRole);
+      await handleGoogleSignIn();
     }
   };
 
@@ -130,22 +131,19 @@ export default function Auth() {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => setSelectedRole('candidate')}
-              className={`w-full p-5 rounded-xl border-2 transition-all text-left ${
-                selectedRole === 'candidate'
+              className={`w-full p-5 rounded-xl border-2 transition-all text-left ${selectedRole === 'candidate'
                   ? 'border-primary bg-primary/5'
                   : 'border-border hover:border-primary/40 bg-card'
-              }`}
+                }`}
             >
               <div className="flex items-start gap-4">
                 <div
-                  className={`w-12 h-12 rounded-xl flex items-center justify-center ${
-                    selectedRole === 'candidate' ? 'gradient-primary' : 'bg-secondary'
-                  }`}
+                  className={`w-12 h-12 rounded-xl flex items-center justify-center ${selectedRole === 'candidate' ? 'gradient-primary' : 'bg-secondary'
+                    }`}
                 >
                   <User
-                    className={`w-6 h-6 ${
-                      selectedRole === 'candidate' ? 'text-primary-foreground' : 'text-muted-foreground'
-                    }`}
+                    className={`w-6 h-6 ${selectedRole === 'candidate' ? 'text-primary-foreground' : 'text-muted-foreground'
+                      }`}
                   />
                 </div>
                 <div className="flex-1">
@@ -161,22 +159,19 @@ export default function Auth() {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => setSelectedRole('recruiter')}
-              className={`w-full p-5 rounded-xl border-2 transition-all text-left ${
-                selectedRole === 'recruiter'
+              className={`w-full p-5 rounded-xl border-2 transition-all text-left ${selectedRole === 'recruiter'
                   ? 'border-primary bg-primary/5'
                   : 'border-border hover:border-primary/40 bg-card'
-              }`}
+                }`}
             >
               <div className="flex items-start gap-4">
                 <div
-                  className={`w-12 h-12 rounded-xl flex items-center justify-center ${
-                    selectedRole === 'recruiter' ? 'gradient-primary' : 'bg-secondary'
-                  }`}
+                  className={`w-12 h-12 rounded-xl flex items-center justify-center ${selectedRole === 'recruiter' ? 'gradient-primary' : 'bg-secondary'
+                    }`}
                 >
                   <Building2
-                    className={`w-6 h-6 ${
-                      selectedRole === 'recruiter' ? 'text-primary-foreground' : 'text-muted-foreground'
-                    }`}
+                    className={`w-6 h-6 ${selectedRole === 'recruiter' ? 'text-primary-foreground' : 'text-muted-foreground'
+                      }`}
                   />
                 </div>
                 <div className="flex-1">

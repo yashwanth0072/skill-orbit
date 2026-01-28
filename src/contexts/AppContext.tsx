@@ -11,6 +11,7 @@ import {
   Candidate,
   calculateMatchPercentage,
 } from '@/lib/mockData';
+import { supabase } from '@/integrations/supabase/client';
 
 type UserRole = 'candidate' | 'recruiter';
 
@@ -38,6 +39,7 @@ interface AppContextType {
   setUserRole: (role: UserRole) => void;
   isAuthenticated: boolean;
   setIsAuthenticated: (auth: boolean) => void;
+  isLoading: boolean;
 
   // Candidate data
   skills: Skill[];
@@ -63,15 +65,15 @@ interface AppContextType {
   updateOpportunityStatus: (id: string, status: 'accepted' | 'declined') => void;
   markEventCompleted: (id: string) => void;
   updateSkillScore: (skillId: string, newScore: number) => void;
-  
+
   // Event management
   addEvent: (event: Event) => void;
   removeEvent: (eventId: string) => void;
-  
+
   // Job role management
   addJobRole: (jobRole: JobRole) => void;
   removeJobRole: (jobRoleId: string) => void;
-  
+
   // Job application management
   sendJobApplications: (jobRoleId: string) => void;
   respondToJobApplication: (applicationId: string, response: 'accepted' | 'declined') => void;
@@ -114,6 +116,27 @@ const loadPersistedSettings = (): UserSettings => {
 export function AppProvider({ children }: { children: ReactNode }) {
   const [userRole, setUserRole] = useState<UserRole>('candidate');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Initialize auth listener
+  React.useEffect(() => {
+    // Check active session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setIsAuthenticated(!!session);
+      setIsLoading(false);
+    });
+
+    // Listen for changes
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setIsAuthenticated(!!session);
+      setIsLoading(false);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
   // Load skills from localStorage on init - only populated after resume upload
   const [skills, setSkillsState] = useState<Skill[]>(loadPersistedSkills);
   const [opportunities, setOpportunities] = useState<Opportunity[]>(mockOpportunities);
@@ -178,7 +201,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setSkills((prev) =>
       prev.map((skill) =>
         skill.id === skillId
-          ? { ...skill, score: newScore, assessedAt: new Date().toISOString().split('T')[0] }
+          ? {
+            ...skill,
+            score: newScore,
+            assessedAt: new Date().toISOString().split('T')[0],
+            status: 'assessed' as const
+          }
           : skill
       )
     );
@@ -213,7 +241,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     if (skills.length === 0) return;
 
     const matchPercentage = calculateMatchPercentage(skills, jobRole.requiredSkills);
-    
+
     // Only send if match is above threshold (e.g., 60%)
     if (matchPercentage >= 60) {
       const newApplication: JobApplication = {
@@ -224,7 +252,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         status: 'pending',
         createdAt: new Date().toISOString(),
       };
-      
+
       setJobApplications((prev) => {
         // Avoid duplicates
         const existing = prev.find(
@@ -270,7 +298,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     const acceptedAppIds = jobApplications
       .filter((app) => app.jobRoleId === jobRoleId && app.status === 'accepted')
       .map((app) => app.id);
-    
+
     // For demo, return all candidates sorted by match
     return [...candidates]
       .filter((c) => c.acceptedAt)
@@ -284,6 +312,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         setUserRole,
         isAuthenticated,
         setIsAuthenticated,
+        isLoading,
         skills,
         setSkills,
         opportunities,
