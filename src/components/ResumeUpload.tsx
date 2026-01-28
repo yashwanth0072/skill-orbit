@@ -250,75 +250,77 @@ export function ResumeUpload({ onResumeProcessed }: ResumeUploadProps) {
 
         {/* Upload Area */}
         {!resumeData && (
-          <div
-            className={`relative border-2 border-dashed rounded-xl p-8 text-center transition-colors ${
-              dragActive
-                ? 'border-primary bg-primary/5'
-                : selectedFile
-                ? 'border-success bg-success/5'
-                : 'border-border hover:border-primary/50'
-            }`}
-            onDragEnter={handleDrag}
-            onDragLeave={handleDrag}
-            onDragOver={handleDrag}
-            onDrop={handleDrop}
-          >
-            <input
-              type="file"
-              accept=".pdf"
-              onChange={handleFileChange}
-              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-              disabled={isLoading}
-            />
-
-            {isLoading ? (
-              <div className="flex flex-col items-center gap-3">
-                <Loader2 className="w-10 h-10 text-primary animate-spin" />
-                <p className="text-sm font-medium text-foreground">
-                  {isUploading ? 'Uploading...' : 'Processing resume...'}
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  {isProcessing && 'Extracting skills and experience via n8n'}
-                </p>
-              </div>
-            ) : selectedFile ? (
-              <div className="flex flex-col items-center gap-3">
-                <div className="flex items-center gap-2">
-                  <FileText className="w-8 h-8 text-success" />
-                  <div className="text-left">
-                    <p className="text-sm font-medium text-foreground">{selectedFile.name}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {(selectedFile.size / 1024).toFixed(1)} KB
-                    </p>
+          <>
+            {/* File selected - show outside the drop zone */}
+            {selectedFile && !isLoading ? (
+              <div className="border-2 border-success bg-success/5 rounded-xl p-8 text-center">
+                <div className="flex flex-col items-center gap-3">
+                  <div className="flex items-center gap-2">
+                    <FileText className="w-8 h-8 text-success" />
+                    <div className="text-left">
+                      <p className="text-sm font-medium text-foreground">{selectedFile.name}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {(selectedFile.size / 1024).toFixed(1)} KB
+                      </p>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-6 w-6 ml-2"
+                      onClick={clearFile}
+                    >
+                      <X className="w-4 h-4" />
+                    </Button>
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-6 w-6 ml-2"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      clearFile();
-                    }}
-                  >
-                    <X className="w-4 h-4" />
+                  <Button onClick={handleUpload} className="gap-2">
+                    <Upload className="w-4 h-4" /> Process Resume
                   </Button>
                 </div>
-                <Button onClick={handleUpload} className="gap-2">
-                  <Upload className="w-4 h-4" /> Process Resume
-                </Button>
               </div>
             ) : (
-              <div className="flex flex-col items-center gap-3">
-                <Upload className="w-10 h-10 text-muted-foreground" />
-                <div>
-                  <p className="text-sm font-medium text-foreground">
-                    Drop your resume here or click to browse
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-1">PDF files only, max 10MB</p>
-                </div>
+              <div
+                className={`relative border-2 border-dashed rounded-xl p-8 text-center transition-colors ${
+                  dragActive
+                    ? 'border-primary bg-primary/5'
+                    : 'border-border hover:border-primary/50'
+                }`}
+                onDragEnter={handleDrag}
+                onDragLeave={handleDrag}
+                onDragOver={handleDrag}
+                onDrop={handleDrop}
+              >
+                <input
+                  type="file"
+                  accept=".pdf"
+                  onChange={handleFileChange}
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                  disabled={isLoading}
+                />
+
+                {isLoading ? (
+                  <div className="flex flex-col items-center gap-3">
+                    <Loader2 className="w-10 h-10 text-primary animate-spin" />
+                    <p className="text-sm font-medium text-foreground">
+                      {isUploading ? 'Uploading...' : 'Processing resume...'}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {isProcessing && 'Extracting skills and experience via n8n'}
+                    </p>
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center gap-3">
+                    <Upload className="w-10 h-10 text-muted-foreground" />
+                    <div>
+                      <p className="text-sm font-medium text-foreground">
+                        Drop your resume here or click to browse
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-1">PDF files only, max 10MB</p>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
-          </div>
+          </>
         )}
 
         {/* Error Display */}
