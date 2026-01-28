@@ -1,8 +1,11 @@
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useApp } from '@/contexts/AppContext';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { EventAssessmentModal } from '@/components/EventAssessmentModal';
+import { Event } from '@/lib/mockData';
 import {
   Calendar,
   MapPin,
@@ -39,10 +42,36 @@ const typeConfig = {
 };
 
 export default function Events() {
-  const { events, markEventCompleted } = useApp();
+  const { events, markEventCompleted, updateSkillScore, skills } = useApp();
+  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
+  const [isAssessmentOpen, setIsAssessmentOpen] = useState(false);
 
   const upcomingEvents = events.filter((e) => !e.completed);
   const completedEvents = events.filter((e) => e.completed);
+
+  const handleStartCompletion = (event: Event) => {
+    setSelectedEvent(event);
+    setIsAssessmentOpen(true);
+  };
+
+  const handleAssessmentComplete = (eventId: string, scoreGain: number) => {
+    // Mark the event as completed
+    markEventCompleted(eventId);
+
+    // Update skills based on the event's relevant skills
+    const event = events.find((e) => e.id === eventId);
+    if (event) {
+      event.relevantSkills.forEach((skillName) => {
+        const skill = skills.find(
+          (s) => s.name.toLowerCase() === skillName.toLowerCase()
+        );
+        if (skill) {
+          const newScore = Math.min(100, skill.score + scoreGain);
+          updateSkillScore(skill.id, newScore);
+        }
+      });
+    }
+  };
 
   return (
     <motion.div
@@ -121,7 +150,7 @@ export default function Events() {
                       <Button variant="outline" size="sm" className="gap-1.5">
                         <ExternalLink className="w-4 h-4" /> View
                       </Button>
-                      <Button size="sm" onClick={() => markEventCompleted(event.id)}>
+                      <Button size="sm" onClick={() => handleStartCompletion(event)}>
                         Mark Complete
                       </Button>
                     </div>
@@ -131,6 +160,14 @@ export default function Events() {
             );
           })}
         </div>
+
+        {upcomingEvents.length === 0 && (
+          <Card>
+            <CardContent className="py-12 text-center">
+              <p className="text-muted-foreground">No upcoming events. Check back later!</p>
+            </CardContent>
+          </Card>
+        )}
       </motion.div>
 
       {/* Completed Events */}
@@ -173,6 +210,17 @@ export default function Events() {
           </div>
         </motion.div>
       )}
+
+      {/* Assessment Modal */}
+      <EventAssessmentModal
+        event={selectedEvent}
+        isOpen={isAssessmentOpen}
+        onClose={() => {
+          setIsAssessmentOpen(false);
+          setSelectedEvent(null);
+        }}
+        onComplete={handleAssessmentComplete}
+      />
     </motion.div>
   );
 }
