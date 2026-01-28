@@ -12,14 +12,15 @@ import { Textarea } from '@/components/ui/textarea';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
-import { CheckCircle, Brain, Target, Award } from 'lucide-react';
-import { Event } from '@/lib/mockData';
+import { CheckCircle, Brain, Target, Award, TrendingUp } from 'lucide-react';
+import { Event, Skill, calculateReadinessIndex } from '@/lib/mockData';
 
 interface EventAssessmentModalProps {
   event: Event | null;
   isOpen: boolean;
   onClose: () => void;
   onComplete: (eventId: string, scoreGain: number) => void;
+  skills: Skill[];
 }
 
 interface Question {
@@ -99,12 +100,18 @@ export function EventAssessmentModal({
   isOpen,
   onClose,
   onComplete,
+  skills,
 }: EventAssessmentModalProps) {
   const [step, setStep] = useState<'questions' | 'reflection' | 'results'>('questions');
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [reflection, setReflection] = useState('');
-  const [totalScore, setTotalScore] = useState(0);
+  const [resultData, setResultData] = useState<{
+    skillBoost: number;
+    oldReadiness: number;
+    newReadiness: number;
+    affectedSkills: string[];
+  } | null>(null);
 
   if (!event) return null;
 
@@ -142,27 +149,62 @@ export function EventAssessmentModal({
       score += 1;
     }
 
-    // Calculate percentage gain (max 15% per event)
-    const maxPoints = questions.length * 3 + 2; // Max score possible
-    const percentageGain = Math.round((score / maxPoints) * 15);
+    // Calculate percentage gain per skill (max 15% per event)
+    const maxPoints = questions.length * 3 + 2;
+    const skillBoost = Math.round((score / maxPoints) * 15);
 
-    setTotalScore(percentageGain);
+    // Calculate actual readiness change
+    const oldReadiness = calculateReadinessIndex(skills);
+
+    // Simulate the skill updates to calculate new readiness
+    const affectedSkillNames: string[] = [];
+    const updatedSkills = skills.map((skill) => {
+      const isRelevant = event.relevantSkills.some(
+        (rs) => rs.toLowerCase() === skill.name.toLowerCase()
+      );
+      if (isRelevant) {
+        affectedSkillNames.push(skill.name);
+        return { ...skill, score: Math.min(100, skill.score + skillBoost) };
+      }
+      return skill;
+    });
+
+    const newReadiness = calculateReadinessIndex(updatedSkills);
+
+    setResultData({
+      skillBoost,
+      oldReadiness,
+      newReadiness,
+      affectedSkills: affectedSkillNames,
+    });
     setStep('results');
   };
 
   const handleComplete = () => {
-    onComplete(event.id, totalScore);
+    if (resultData) {
+      onComplete(event.id, resultData.skillBoost);
+    }
     // Reset state
     setStep('questions');
     setCurrentQuestionIndex(0);
     setAnswers({});
     setReflection('');
-    setTotalScore(0);
+    setResultData(null);
+    onClose();
+  };
+
+  const handleClose = () => {
+    // Reset state on close
+    setStep('questions');
+    setCurrentQuestionIndex(0);
+    setAnswers({});
+    setReflection('');
+    setResultData(null);
     onClose();
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle className="font-display flex items-center gap-2">
@@ -261,7 +303,7 @@ export function EventAssessmentModal({
             </motion.div>
           )}
 
-          {step === 'results' && (
+          {step === 'results' && resultData && (
             <motion.div
               key="results"
               initial={{ opacity: 0, scale: 0.95 }}
@@ -282,17 +324,42 @@ export function EventAssessmentModal({
                 </p>
               </div>
 
-              <div className="p-4 rounded-xl bg-primary/5 border border-primary/20">
-                <p className="text-sm text-muted-foreground mb-1">Skill Score Boost</p>
-                <p className="text-4xl font-display font-bold text-primary">+{totalScore}%</p>
+              {/* Skills Boost */}
+              <div className="p-4 rounded-xl bg-secondary/50 border border-border">
+                <p className="text-sm text-muted-foreground mb-1">Skill Boost per Skill</p>
+                <p className="text-2xl font-display font-bold text-primary">
+                  +{resultData.skillBoost}%
+                </p>
                 <p className="text-xs text-muted-foreground mt-1">
-                  Applied to: {event.relevantSkills.join(', ')}
+                  Applied to: {resultData.affectedSkills.length > 0 ? resultData.affectedSkills.join(', ') : 'No matching skills found'}
+                </p>
+              </div>
+
+              {/* Readiness Index Change */}
+              <div className="p-4 rounded-xl bg-primary/5 border border-primary/20">
+                <div className="flex items-center justify-center gap-2 mb-2">
+                  <TrendingUp className="w-5 h-5 text-primary" />
+                  <p className="text-sm font-medium text-foreground">Readiness Index Update</p>
+                </div>
+                <div className="flex items-center justify-center gap-4">
+                  <div className="text-center">
+                    <p className="text-xs text-muted-foreground">Before</p>
+                    <p className="text-xl font-semibold text-muted-foreground">{resultData.oldReadiness}%</p>
+                  </div>
+                  <div className="text-2xl text-primary">→</div>
+                  <div className="text-center">
+                    <p className="text-xs text-muted-foreground">After</p>
+                    <p className="text-xl font-semibold text-primary">{resultData.newReadiness}%</p>
+                  </div>
+                </div>
+                <p className="text-lg font-display font-bold text-success mt-2">
+                  +{resultData.newReadiness - resultData.oldReadiness}% Overall
                 </p>
               </div>
 
               <div className="flex items-center gap-2 justify-center text-sm text-success">
                 <CheckCircle className="w-4 h-4" />
-                <span>Your readiness index has been updated</span>
+                <span>Your profile has been updated</span>
               </div>
 
               <Button onClick={handleComplete} className="w-full">
