@@ -11,7 +11,8 @@ import {
   Candidate,
   calculateMatchPercentage,
 } from '@/lib/mockData';
-import { supabase } from '@/integrations/supabase/client';
+import { auth } from '@/integrations/firebase/config';
+import { onAuthStateChanged } from 'firebase/auth';
 
 type UserRole = 'candidate' | 'recruiter';
 
@@ -120,21 +121,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   // Initialize auth listener
   React.useEffect(() => {
-    // Check active session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setIsAuthenticated(!!session);
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setIsAuthenticated(!!user);
       setIsLoading(false);
     });
 
-    // Listen for changes
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setIsAuthenticated(!!session);
-      setIsLoading(false);
-    });
-
-    return () => subscription.unsubscribe();
+    return () => unsubscribe();
   }, []);
 
   // Load skills from localStorage on init - only populated after resume upload

@@ -4,7 +4,8 @@ import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useApp } from '@/contexts/AppContext';
-import { supabase } from '@/integrations/supabase/client';
+import { auth, googleProvider } from '@/integrations/firebase/config';
+import { signInWithPopup } from 'firebase/auth';
 import { Orbit, User, Building2, ArrowRight } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 
@@ -25,25 +26,14 @@ export default function Auth() {
 
   const handleGoogleSignIn = async () => {
     setIsGoogleLoading(true);
+
     try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: window.location.origin,
-        },
-      });
-
-      if (error) {
-        toast({
-          title: 'Sign in failed',
-          description: error.message,
-          variant: 'destructive',
-        });
-        return;
-      }
-
-      // Supabase will redirect the user to Google Oauth, so we don't need to show a success toast here immediately.
+      await signInWithPopup(auth, googleProvider);
+      // Firebase automatically handles the auth state change which AppContext listens to
+      // We don't need manual navigation here usually, but if needed:
+      // navigate('/dashboard'); 
     } catch (err) {
+      console.error('Firebase Auth Error:', err);
       toast({
         title: 'Sign in failed',
         description: err instanceof Error ? err.message : 'An error occurred',
@@ -132,8 +122,8 @@ export default function Auth() {
               whileTap={{ scale: 0.98 }}
               onClick={() => setSelectedRole('candidate')}
               className={`w-full p-5 rounded-xl border-2 transition-all text-left ${selectedRole === 'candidate'
-                  ? 'border-primary bg-primary/5'
-                  : 'border-border hover:border-primary/40 bg-card'
+                ? 'border-primary bg-primary/5'
+                : 'border-border hover:border-primary/40 bg-card'
                 }`}
             >
               <div className="flex items-start gap-4">
@@ -160,8 +150,8 @@ export default function Auth() {
               whileTap={{ scale: 0.98 }}
               onClick={() => setSelectedRole('recruiter')}
               className={`w-full p-5 rounded-xl border-2 transition-all text-left ${selectedRole === 'recruiter'
-                  ? 'border-primary bg-primary/5'
-                  : 'border-border hover:border-primary/40 bg-card'
+                ? 'border-primary bg-primary/5'
+                : 'border-border hover:border-primary/40 bg-card'
                 }`}
             >
               <div className="flex items-start gap-4">
