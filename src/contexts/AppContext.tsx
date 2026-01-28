@@ -47,20 +47,72 @@ interface AppContextType {
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
-export function AppProvider({ children }: { children: ReactNode }) {
-  const [userRole, setUserRole] = useState<UserRole>('candidate');
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  // Start with empty skills - populated after resume upload
-  const [skills, setSkills] = useState<Skill[]>([]);
-  const [opportunities, setOpportunities] = useState<Opportunity[]>(mockOpportunities);
-  const [events, setEvents] = useState<Event[]>(mockEvents);
-  const [candidates, setCandidates] = useState<Candidate[]>(mockCandidates);
-  const [settings, setSettings] = useState<UserSettings>({
+// Helper to load persisted skills from localStorage
+const loadPersistedSkills = (): Skill[] => {
+  try {
+    const stored = localStorage.getItem('candidateSkills');
+    if (stored) {
+      return JSON.parse(stored);
+    }
+  } catch (e) {
+    console.error('Failed to load persisted skills:', e);
+  }
+  return [];
+};
+
+// Helper to load persisted settings from localStorage
+const loadPersistedSettings = (): UserSettings => {
+  try {
+    const stored = localStorage.getItem('candidateSettings');
+    if (stored) {
+      return JSON.parse(stored);
+    }
+  } catch (e) {
+    console.error('Failed to load persisted settings:', e);
+  }
+  return {
     reverseHiringEnabled: true,
     emailNotifications: true,
     opportunityAlerts: true,
     eventNotifications: true,
-  });
+  };
+};
+
+export function AppProvider({ children }: { children: ReactNode }) {
+  const [userRole, setUserRole] = useState<UserRole>('candidate');
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  // Load skills from localStorage on init - only populated after resume upload
+  const [skills, setSkillsState] = useState<Skill[]>(loadPersistedSkills);
+  const [opportunities, setOpportunities] = useState<Opportunity[]>(mockOpportunities);
+  const [events, setEvents] = useState<Event[]>(mockEvents);
+  const [candidates, setCandidates] = useState<Candidate[]>(mockCandidates);
+  const [settings, setSettingsState] = useState<UserSettings>(loadPersistedSettings);
+
+  // Wrapper to persist skills to localStorage
+  const setSkills: React.Dispatch<React.SetStateAction<Skill[]>> = (value) => {
+    setSkillsState((prev) => {
+      const newSkills = typeof value === 'function' ? value(prev) : value;
+      try {
+        localStorage.setItem('candidateSkills', JSON.stringify(newSkills));
+      } catch (e) {
+        console.error('Failed to persist skills:', e);
+      }
+      return newSkills;
+    });
+  };
+
+  // Wrapper to persist settings to localStorage
+  const setSettings: React.Dispatch<React.SetStateAction<UserSettings>> = (value) => {
+    setSettingsState((prev) => {
+      const newSettings = typeof value === 'function' ? value(prev) : value;
+      try {
+        localStorage.setItem('candidateSettings', JSON.stringify(newSettings));
+      } catch (e) {
+        console.error('Failed to persist settings:', e);
+      }
+      return newSettings;
+    });
+  };
 
   const updateOpportunityStatus = (id: string, status: 'accepted' | 'declined') => {
     setOpportunities((prev) =>
