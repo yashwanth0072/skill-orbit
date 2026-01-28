@@ -136,7 +136,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [skills, setSkillsState] = useState<Skill[]>(loadPersistedSkills);
   const [opportunities, setOpportunities] = useState<Opportunity[]>(mockOpportunities);
   const [events, setEventsState] = useState<Event[]>(mockEvents);
-  const [candidates, setCandidates] = useState<Candidate[]>(mockCandidates);
+  const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [settings, setSettingsState] = useState<UserSettings>(loadPersistedSettings);
   const [jobRoles, setJobRoles] = useState<JobRole[]>(mockJobRoles);
   const [jobApplications, setJobApplications] = useState<JobApplication[]>([]);
