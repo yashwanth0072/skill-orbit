@@ -173,7 +173,7 @@ export default function Landing() {
             className="text-center mb-16"
           >
             <h2 className="font-display text-4xl font-bold text-foreground mb-4">
-              Why Choose Skill Orbith?
+              Why Choose Skill Orbit?
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
               We flip the traditional hiring model. No more endless applications—let your skills do the talking.
@@ -287,10 +287,10 @@ export default function Landing() {
               <div className="w-8 h-8 rounded-lg gradient-primary flex items-center justify-center">
                 <Orbit className="w-4 h-4 text-primary-foreground" />
               </div>
-              <span className="font-display font-semibold text-foreground">Skill Orbith</span>
+              <span className="font-display font-semibold text-foreground">Skill Orbit</span>
             </div>
             <p className="text-sm text-muted-foreground">
-              © 2024 Skill Orbith. All rights reserved.
+              © 2024 Skill Orbit. All rights reserved.
             </p>
           </div>
         </div>
