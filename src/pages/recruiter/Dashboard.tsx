@@ -1,8 +1,7 @@
 import { motion } from 'framer-motion';
 import { useApp } from '@/contexts/AppContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { mockJobRoles } from '@/lib/mockData';
-import { Users, Briefcase, TrendingUp, Target } from 'lucide-react';
+import { Users, Briefcase, TrendingUp, Target, Calendar, Send } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 
@@ -17,9 +16,12 @@ const itemVariants = {
 };
 
 export default function RecruiterDashboard() {
-  const { candidates } = useApp();
+  const { candidates, jobRoles, jobApplications, events } = useApp();
   const acceptedCandidates = candidates.filter((c) => c.acceptedAt);
-  const jobRole = mockJobRoles[0];
+  const jobRole = jobRoles[0];
+  const upcomingEvents = events.filter((e) => !e.completed);
+  const pendingApplications = jobApplications.filter((a) => a.status === 'pending');
+  const acceptedApplications = jobApplications.filter((a) => a.status === 'accepted');
 
   const avgMatchPercentage = acceptedCandidates.length > 0 
     ? Math.round(
@@ -50,14 +52,14 @@ export default function RecruiterDashboard() {
       </motion.div>
 
       {/* Stats */}
-      <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-4 gap-6">
+      <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-5 gap-6">
         <Card className="gradient-card">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Active Roles</p>
                 <p className="text-3xl font-display font-bold text-foreground mt-1">
-                  {mockJobRoles.length}
+                  {jobRoles.length}
                 </p>
               </div>
               <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
@@ -71,9 +73,41 @@ export default function RecruiterDashboard() {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Eligible Candidates</p>
+                <p className="text-sm text-muted-foreground">Active Events</p>
                 <p className="text-3xl font-display font-bold text-foreground mt-1">
-                  {acceptedCandidates.length}
+                  {upcomingEvents.length}
+                </p>
+              </div>
+              <div className="w-12 h-12 rounded-xl bg-info/10 flex items-center justify-center">
+                <Calendar className="w-6 h-6 text-info" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="gradient-card">
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">Pending Responses</p>
+                <p className="text-3xl font-display font-bold text-foreground mt-1">
+                  {pendingApplications.length}
+                </p>
+              </div>
+              <div className="w-12 h-12 rounded-xl bg-warning/10 flex items-center justify-center">
+                <Send className="w-6 h-6 text-warning" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="gradient-card">
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">Accepted</p>
+                <p className="text-3xl font-display font-bold text-foreground mt-1">
+                  {acceptedApplications.length}
                 </p>
               </div>
               <div className="w-12 h-12 rounded-xl bg-success/10 flex items-center justify-center">
@@ -92,24 +126,8 @@ export default function RecruiterDashboard() {
                   {avgMatchPercentage}%
                 </p>
               </div>
-              <div className="w-12 h-12 rounded-xl bg-info/10 flex items-center justify-center">
-                <TrendingUp className="w-6 h-6 text-info" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="gradient-card">
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Skills Tracked</p>
-                <p className="text-3xl font-display font-bold text-foreground mt-1">
-                  {jobRole.requiredSkills.length}
-                </p>
-              </div>
               <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center">
-                <Target className="w-6 h-6 text-accent-foreground" />
+                <TrendingUp className="w-6 h-6 text-accent-foreground" />
               </div>
             </div>
           </CardContent>

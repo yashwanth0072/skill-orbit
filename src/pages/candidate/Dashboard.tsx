@@ -7,6 +7,7 @@ import { SkillRadar } from '@/components/ui/SkillRadar';
 import { SkillBar } from '@/components/ui/SkillBar';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { ResumeUpload } from '@/components/ResumeUpload';
+import { JobApplicationNotifications } from '@/components/JobApplicationNotifications';
 import { calculateReadinessIndex, mockSkillGaps, Skill } from '@/lib/mockData';
 import { ResumeData } from '@/lib/resumeTypes';
 import { Link } from 'react-router-dom';
@@ -72,6 +73,8 @@ export default function CandidateDashboard() {
       animate="visible"
       className="space-y-8"
     >
+      {/* Job Application Notifications */}
+      <JobApplicationNotifications />
       {/* Header */}
       <motion.div variants={itemVariants} className="flex items-center justify-between">
         <div>
