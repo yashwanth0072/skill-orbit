@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useApp } from '@/contexts/AppContext';
-import { lovable } from '@/integrations/lovable';
+import { supabase } from '@/integrations/supabase/client';
 import { Orbit, User, Building2, ArrowRight } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 
@@ -25,13 +25,12 @@ export default function Auth() {
   const handleGoogleSignIn = async () => {
     setIsGoogleLoading(true);
     try {
-      const { error, redirected } = await lovable.auth.signInWithOAuth('google', {
-        redirect_uri: window.location.origin,
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: window.location.origin,
+        },
       });
-
-      if (redirected) {
-        return;
-      }
 
       if (error) {
         toast({
@@ -42,10 +41,7 @@ export default function Auth() {
         return;
       }
 
-      toast({
-        title: 'Signed in successfully',
-        description: 'Welcome to Skill Orbit!',
-      });
+      // Supabase will redirect the user to Google Oauth, so we don't need to show a success toast here immediately.
     } catch (err) {
       toast({
         title: 'Sign in failed',
