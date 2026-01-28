@@ -165,7 +165,7 @@ export default function Auth() {
                   />
                 </div>
                 <div className="flex-1">
-                  <h3 className="font-semibold text-foreground text-lg">I'm a Company</h3>
+                  <h3 className="font-semibold text-foreground text-lg">I'm a Recruiter</h3>
                   <p className="text-sm text-muted-foreground mt-1">
                     Post job roles and find candidates that match your skill requirements
                   </p>

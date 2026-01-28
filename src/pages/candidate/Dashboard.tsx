@@ -43,7 +43,24 @@ export default function CandidateDashboard() {
   const hasSkills = skills.length > 0;
   const readinessIndex = hasSkills ? calculateReadinessIndex(skills) : 0;
   const pendingOpportunities = opportunities.filter((o) => o.status === 'pending');
-  const topGaps = mockSkillGaps.slice(0, 3);
+
+  // Calculate skill gaps dynamically based on assessments
+  const calculatedSkillGaps = skills
+    .filter(s => s.status === 'assessed' && s.score < (s.targetScore || 80))
+    .map(s => ({
+      skillId: s.id,
+      skillName: s.name,
+      currentScore: s.score,
+      requiredScore: s.targetScore || 80,
+      gap: (s.targetScore || 80) - s.score,
+      priority: ((s.targetScore || 80) - s.score) > 20 ? 'high' : 'medium' as const
+    }))
+    .sort((a, b) => b.gap - a.gap)
+    .slice(0, 3);
+
+  // Create fallback gaps if no assessments yet (to show something UI-wise, or just show empty)
+  // User requested "based on assessments", so if no assessments, this list might be empty.
+  const topGaps = calculatedSkillGaps;
   const upcomingEvents = events.filter((e) => !e.completed).slice(0, 2);
 
   const handleResumeProcessed = (resumeData: ResumeData) => {
@@ -209,21 +226,28 @@ export default function CandidateDashboard() {
                   <AlertTriangle className="w-5 h-5 text-warning" />
                 </CardHeader>
                 <CardContent className="space-y-6">
-                  {topGaps.map((gap, index) => (
-                    <div key={gap.skillId} className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium text-foreground">{gap.skillName}</span>
-                        <StatusBadge status={gap.priority === 'high' ? 'pending' : 'unmatched'} />
+                  {topGaps.length > 0 ? (
+                    topGaps.map((gap, index) => (
+                      <div key={gap.skillId} className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm font-medium text-foreground">{gap.skillName}</span>
+                          <StatusBadge status={gap.priority === 'high' ? 'pending' : 'unmatched'} />
+                        </div>
+                        <SkillBar
+                          name=""
+                          score={gap.currentScore}
+                          targetScore={gap.requiredScore}
+                          showTarget
+                          delay={index * 0.1}
+                        />
                       </div>
-                      <SkillBar
-                        name=""
-                        score={gap.currentScore}
-                        targetScore={gap.requiredScore}
-                        showTarget
-                        delay={index * 0.1}
-                      />
+                    ))
+                  ) : (
+                    <div className="text-center py-6 text-muted-foreground text-sm">
+                      <p>No major skill gaps found yet.</p>
+                      <p className="mt-1">Take assessments to identify areas for improvement.</p>
                     </div>
-                  ))}
+                  )}
                   <Link to="/events" className="block">
                     <Button variant="outline" className="w-full gap-2">
                       Find Learning Events <ArrowRight className="w-4 h-4" />
@@ -241,7 +265,7 @@ export default function CandidateDashboard() {
                   <Briefcase className="w-5 h-5 text-primary" />
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {opportunities.slice(0, 3).map((opp) => (
+                  {pendingOpportunities.slice(0, 3).map((opp) => (
                     <div
                       key={opp.id}
                       className="p-4 rounded-xl bg-secondary/50 border border-border hover:border-primary/20 transition-colors"

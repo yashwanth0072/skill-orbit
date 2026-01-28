@@ -115,7 +115,10 @@ const loadPersistedSettings = (): UserSettings => {
 };
 
 export function AppProvider({ children }: { children: ReactNode }) {
-  const [userRole, setUserRole] = useState<UserRole>('candidate');
+  const [userRole, setUserRole] = useState<UserRole>(() => {
+    const stored = localStorage.getItem('userRole');
+    return (stored === 'recruiter' || stored === 'candidate') ? stored : 'candidate';
+  });
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
