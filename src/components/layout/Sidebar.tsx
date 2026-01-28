@@ -13,6 +13,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Orbit,
+  TrendingUp,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -21,6 +22,7 @@ import { useState } from 'react';
 const candidateNavItems = [
   { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard' },
   { icon: Target, label: 'Assessments', path: '/assessments' },
+  { icon: TrendingUp, label: 'Progress', path: '/progress' },
   { icon: Briefcase, label: 'Opportunities', path: '/opportunities' },
   { icon: Calendar, label: 'Events', path: '/events' },
   { icon: Settings, label: 'Settings', path: '/settings' },

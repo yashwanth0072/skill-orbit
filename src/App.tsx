@@ -14,6 +14,7 @@ import CandidateDashboard from "./pages/candidate/Dashboard";
 import Assessments from "./pages/candidate/Assessments";
 import Opportunities from "./pages/candidate/Opportunities";
 import Events from "./pages/candidate/Events";
+import Progress from "./pages/candidate/Progress";
 import Settings from "./pages/candidate/Settings";
 
 // Recruiter Pages
@@ -63,6 +64,7 @@ function AppRoutes() {
       >
         <Route path="/dashboard" element={<CandidateDashboard />} />
         <Route path="/assessments" element={<Assessments />} />
+        <Route path="/progress" element={<Progress />} />
         <Route path="/opportunities" element={<Opportunities />} />
         <Route path="/events" element={<Events />} />
         <Route path="/settings" element={<Settings />} />
