@@ -2,24 +2,15 @@ import { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { toast } from '@/hooks/use-toast';
 import { ResumeData, ResumeUploadState } from '@/lib/resumeTypes';
-import {
-  uploadResumeToN8n,
-  mockResumeProcessing,
-  isWebhookConfigured,
-  setResumeWebhookUrl,
-  getResumeWebhookUrl,
-} from '@/services/n8nWebhookService';
+import { processResume } from '@/services/resumeService';
 import {
   Upload,
   FileText,
   Loader2,
   CheckCircle,
   AlertCircle,
-  Settings,
   X,
   User,
   Mail,
@@ -43,9 +34,6 @@ export function ResumeUpload({ onResumeProcessed }: ResumeUploadProps) {
   });
   const [dragActive, setDragActive] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [showConfig, setShowConfig] = useState(false);
-  const [webhookUrl, setWebhookUrl] = useState(getResumeWebhookUrl() || '');
-  const [useMockData, setUseMockData] = useState(!isWebhookConfigured());
 
   const handleDrag = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -112,21 +100,13 @@ export function ResumeUpload({ onResumeProcessed }: ResumeUploadProps) {
     });
 
     try {
-      // Simulate upload delay
-      await new Promise((resolve) => setTimeout(resolve, 500));
-
       setUploadState((prev) => ({
         ...prev,
         isUploading: false,
         isProcessing: true,
       }));
 
-      let response;
-      if (useMockData || !isWebhookConfigured()) {
-        response = await mockResumeProcessing(selectedFile);
-      } else {
-        response = await uploadResumeToN8n(selectedFile);
-      }
+      const response = await processResume(selectedFile);
 
       if (response.success && response.data) {
         setUploadState({
@@ -158,18 +138,6 @@ export function ResumeUpload({ onResumeProcessed }: ResumeUploadProps) {
     }
   };
 
-  const handleSaveWebhookUrl = () => {
-    if (webhookUrl.trim()) {
-      setResumeWebhookUrl(webhookUrl.trim());
-      setUseMockData(false);
-      toast({
-        title: 'Webhook URL saved',
-        description: 'Your n8n webhook URL has been configured.',
-      });
-    }
-    setShowConfig(false);
-  };
-
   const clearFile = () => {
     setSelectedFile(null);
     setUploadState({
@@ -185,69 +153,13 @@ export function ResumeUpload({ onResumeProcessed }: ResumeUploadProps) {
 
   return (
     <Card className="border-border">
-      <CardHeader className="flex flex-row items-center justify-between">
+      <CardHeader>
         <CardTitle className="font-display text-lg flex items-center gap-2">
           <FileText className="w-5 h-5 text-primary" />
           Resume Upload
         </CardTitle>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => setShowConfig(!showConfig)}
-          className="h-8 w-8"
-        >
-          <Settings className="w-4 h-4" />
-        </Button>
       </CardHeader>
       <CardContent className="space-y-4">
-        {/* Webhook Configuration */}
-        <AnimatePresence>
-          {showConfig && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              className="space-y-3 p-4 bg-secondary/50 rounded-xl border border-border"
-            >
-              <Label htmlFor="webhook-url" className="text-sm font-medium">
-                n8n Webhook URL
-              </Label>
-              <Input
-                id="webhook-url"
-                placeholder="https://your-n8n-instance.com/webhook/..."
-                value={webhookUrl}
-                onChange={(e) => setWebhookUrl(e.target.value)}
-              />
-              <div className="flex items-center gap-2">
-                <Button size="sm" onClick={handleSaveWebhookUrl}>
-                  Save URL
-                </Button>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => {
-                    setUseMockData(true);
-                    setShowConfig(false);
-                    toast({
-                      title: 'Using mock data',
-                      description: 'Resume parsing will use simulated data for testing.',
-                    });
-                  }}
-                >
-                  Use Mock Data
-                </Button>
-              </div>
-              <p className="text-xs text-muted-foreground">
-                {useMockData
-                  ? '⚡ Currently using mock data for testing'
-                  : isWebhookConfigured()
-                  ? '✓ Webhook configured - uploads will be sent to n8n'
-                  : '⚠ No webhook configured - using mock data'}
-              </p>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
         {/* Upload Area */}
         {!resumeData && (
           <>
@@ -301,10 +213,10 @@ export function ResumeUpload({ onResumeProcessed }: ResumeUploadProps) {
                   <div className="flex flex-col items-center gap-3">
                     <Loader2 className="w-10 h-10 text-primary animate-spin" />
                     <p className="text-sm font-medium text-foreground">
-                      {isUploading ? 'Uploading...' : 'Processing resume...'}
+                      {isUploading ? 'Uploading...' : 'Processing resume with AI...'}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      {isProcessing && 'Extracting skills and experience via n8n'}
+                      {isProcessing && 'Extracting skills and experience'}
                     </p>
                   </div>
                 ) : (
