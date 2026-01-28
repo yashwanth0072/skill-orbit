@@ -6,8 +6,11 @@ import { ProgressRing } from '@/components/ui/ProgressRing';
 import { SkillRadar } from '@/components/ui/SkillRadar';
 import { SkillBar } from '@/components/ui/SkillBar';
 import { StatusBadge } from '@/components/ui/StatusBadge';
-import { calculateReadinessIndex, mockSkillGaps } from '@/lib/mockData';
+import { ResumeUpload } from '@/components/ResumeUpload';
+import { calculateReadinessIndex, mockSkillGaps, Skill } from '@/lib/mockData';
+import { ResumeData } from '@/lib/resumeTypes';
 import { Link } from 'react-router-dom';
+import { toast } from '@/hooks/use-toast';
 import {
   Target,
   TrendingUp,
@@ -34,11 +37,38 @@ const itemVariants = {
 };
 
 export default function CandidateDashboard() {
-  const { skills, opportunities, events, settings } = useApp();
+  const { skills, opportunities, events, settings, setSkills } = useApp();
   const readinessIndex = calculateReadinessIndex(skills);
   const pendingOpportunities = opportunities.filter((o) => o.status === 'pending');
   const topGaps = mockSkillGaps.slice(0, 3);
   const upcomingEvents = events.filter((e) => !e.completed).slice(0, 2);
+
+  const handleResumeProcessed = (resumeData: ResumeData) => {
+    if (resumeData.extractedSkills && resumeData.extractedSkills.length > 0) {
+      const newSkills: Skill[] = resumeData.extractedSkills.map((extracted, index) => ({
+        id: `resume-${index + 1}`,
+        name: extracted.name,
+        category: extracted.category,
+        score: Math.min(100, 50 + (extracted.yearsOfExperience || 1) * 10),
+        maxScore: 100,
+        targetScore: 80,
+        assessedAt: new Date().toISOString().split('T')[0],
+      }));
+
+      // Merge with existing skills, preferring resume data for duplicates
+      const existingSkillNames = new Set(skills.map((s) => s.name.toLowerCase()));
+      const uniqueNewSkills = newSkills.filter(
+        (s) => !existingSkillNames.has(s.name.toLowerCase())
+      );
+      const updatedSkills = [...skills, ...uniqueNewSkills];
+
+      setSkills(updatedSkills);
+      toast({
+        title: 'Skills updated!',
+        description: `Added ${uniqueNewSkills.length} new skills from your resume.`,
+      });
+    }
+  };
 
   return (
     <motion.div
@@ -133,6 +163,11 @@ export default function CandidateDashboard() {
             </div>
           </CardContent>
         </Card>
+      </motion.div>
+
+      {/* Resume Upload Section */}
+      <motion.div variants={itemVariants}>
+        <ResumeUpload onResumeProcessed={handleResumeProcessed} />
       </motion.div>
 
       {/* Main Content Grid */}
