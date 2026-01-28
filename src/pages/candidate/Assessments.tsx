@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react';
+import { generateQuizWithGemini } from '@/lib/gemini';
+import { toast } from '@/hooks/use-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useApp } from '@/contexts/AppContext';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -44,20 +46,40 @@ export default function Assessments() {
     }
   }, [location.state]);
 
-  const startAssessment = (skillId: string) => {
+  const startAssessment = async (skillId: string) => {
     setSelectedSkillId(skillId);
     setState('generating');
 
-    // Simulate AI generation delay
-    setTimeout(() => {
-      // Here we would call Gemini to generate questions for the specific skill
-      // using skill name: skills.find(s => s.id === skillId)?.name
-      setQuestions(mockAssessmentQuestions.sort(() => 0.5 - Math.random()).slice(0, 3));
+    try {
+      const skillName = skills.find(s => s.id === skillId)?.name || 'General Skill';
+      // Call Gemini API
+      const generatedQuestions = await generateQuizWithGemini(skillName);
+
+      // Map to AssessmentQuestion interface (add ids)
+      const formattedQuestions = generatedQuestions.map((q: any, i: number) => ({
+        id: `gen-${Date.now()}-${i}`,
+        skillId,
+        question: q.question,
+        options: q.options,
+        correctAnswer: q.correctAnswer
+      }));
+
+      setQuestions(formattedQuestions);
       setCurrentQuestion(0);
       setAnswers([]);
       setResult(null);
       setState('in-progress');
-    }, 2000);
+    } catch (error) {
+      console.error("Failed to generate quiz:", error);
+      toast({
+        title: "Generation failed",
+        description: "Falling back to demo questions.",
+        variant: "destructive"
+      });
+      // Fallback to mock data
+      setQuestions(mockAssessmentQuestions.sort(() => 0.5 - Math.random()).slice(0, 3));
+      setState('in-progress');
+    }
   };
 
   const selectAnswer = (answerIndex: number) => {
@@ -243,12 +265,12 @@ export default function Assessments() {
                             onClick={() => !showResult && selectAnswer(index)}
                             disabled={showResult}
                             className={`w-full p-4 rounded-xl border text-left transition-all ${showResult
-                                ? isCorrect
-                                  ? 'bg-success/10 border-success text-success'
-                                  : isSelected
-                                    ? 'bg-destructive/10 border-destructive text-destructive'
-                                    : 'bg-secondary/50 border-border text-muted-foreground'
-                                : 'bg-secondary/50 border-border hover:border-primary/50 hover:bg-primary/5 text-foreground'
+                              ? isCorrect
+                                ? 'bg-success/10 border-success text-success'
+                                : isSelected
+                                  ? 'bg-destructive/10 border-destructive text-destructive'
+                                  : 'bg-secondary/50 border-border text-muted-foreground'
+                              : 'bg-secondary/50 border-border hover:border-primary/50 hover:bg-primary/5 text-foreground'
                               }`}
                           >
                             <div className="flex items-center justify-between">

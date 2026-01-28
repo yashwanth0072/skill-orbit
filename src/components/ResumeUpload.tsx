@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
 import { ResumeData, ResumeUploadState } from '@/lib/resumeTypes';
-import { processResume } from '@/services/resumeService';
+import { processResumeWithGemini } from '@/lib/gemini';
 import {
   Upload,
   FileText,
@@ -106,23 +106,19 @@ export function ResumeUpload({ onResumeProcessed }: ResumeUploadProps) {
         isProcessing: true,
       }));
 
-      const response = await processResume(selectedFile);
+      const data = await processResumeWithGemini(selectedFile);
 
-      if (response.success && response.data) {
-        setUploadState({
-          isUploading: false,
-          isProcessing: false,
-          error: null,
-          resumeData: response.data,
-        });
-        onResumeProcessed(response.data);
-        toast({
-          title: 'Resume processed successfully!',
-          description: 'Your skills and experience have been extracted.',
-        });
-      } else {
-        throw new Error(response.error || 'Failed to process resume');
-      }
+      setUploadState({
+        isUploading: false,
+        isProcessing: false,
+        error: null,
+        resumeData: data,
+      });
+      onResumeProcessed(data);
+      toast({
+        title: 'Resume processed successfully!',
+        description: 'Your skills and experience have been extracted.',
+      });
     } catch (error) {
       setUploadState({
         isUploading: false,
@@ -191,11 +187,10 @@ export function ResumeUpload({ onResumeProcessed }: ResumeUploadProps) {
               </div>
             ) : (
               <div
-                className={`relative border-2 border-dashed rounded-xl p-8 text-center transition-colors ${
-                  dragActive
-                    ? 'border-primary bg-primary/5'
-                    : 'border-border hover:border-primary/50'
-                }`}
+                className={`relative border-2 border-dashed rounded-xl p-8 text-center transition-colors ${dragActive
+                  ? 'border-primary bg-primary/5'
+                  : 'border-border hover:border-primary/50'
+                  }`}
                 onDragEnter={handleDrag}
                 onDragLeave={handleDrag}
                 onDragOver={handleDrag}
