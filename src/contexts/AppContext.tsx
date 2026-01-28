@@ -139,8 +139,43 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [events, setEventsState] = useState<Event[]>(mockEvents);
   const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [settings, setSettingsState] = useState<UserSettings>(loadPersistedSettings);
-  const [jobRoles, setJobRoles] = useState<JobRole[]>(mockJobRoles);
-  const [jobApplications, setJobApplications] = useState<JobApplication[]>([]);
+  // Load jobs from localStorage or fallback to mock
+  const [jobRoles, setJobRolesState] = useState<JobRole[]>(() => {
+    try {
+      const stored = localStorage.getItem('jobRoles');
+      return stored ? JSON.parse(stored) : mockJobRoles;
+    } catch {
+      return mockJobRoles;
+    }
+  });
+
+  // Load applications from localStorage
+  const [jobApplications, setJobApplicationsState] = useState<JobApplication[]>(() => {
+    try {
+      const stored = localStorage.getItem('jobApplications');
+      return stored ? JSON.parse(stored) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  // Wrapper to persist jobRoles
+  const setJobRoles: React.Dispatch<React.SetStateAction<JobRole[]>> = (value) => {
+    setJobRolesState((prev) => {
+      const newVal = typeof value === 'function' ? value(prev) : value;
+      localStorage.setItem('jobRoles', JSON.stringify(newVal));
+      return newVal;
+    });
+  };
+
+  // Wrapper to persist jobApplications
+  const setJobApplications: React.Dispatch<React.SetStateAction<JobApplication[]>> = (value) => {
+    setJobApplicationsState((prev) => {
+      const newVal = typeof value === 'function' ? value(prev) : value;
+      localStorage.setItem('jobApplications', JSON.stringify(newVal));
+      return newVal;
+    });
+  };
 
   // Wrapper to persist skills to localStorage
   const setSkills: React.Dispatch<React.SetStateAction<Skill[]>> = (value) => {
