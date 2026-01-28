@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useApp } from '@/contexts/AppContext';
 import { Card, CardContent } from '@/components/ui/card';
@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { EventAssessmentModal } from '@/components/EventAssessmentModal';
 import { Event } from '@/lib/mockData';
+import { toast } from '@/hooks/use-toast';
 import {
   Calendar,
   MapPin,
@@ -14,6 +15,7 @@ import {
   Zap,
   GraduationCap,
   Code,
+  Bell,
 } from 'lucide-react';
 
 const containerVariants = {
@@ -42,12 +44,30 @@ const typeConfig = {
 };
 
 export default function Events() {
-  const { events, markEventCompleted, updateSkillScore, skills } = useApp();
+  const { events, markEventCompleted, updateSkillScore, skills, settings } = useApp();
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [isAssessmentOpen, setIsAssessmentOpen] = useState(false);
 
   const upcomingEvents = events.filter((e) => !e.completed);
   const completedEvents = events.filter((e) => e.completed);
+
+  // Show in-app notification for new events matching skill gaps
+  useEffect(() => {
+    if (settings.eventNotifications && upcomingEvents.length > 0) {
+      const highMatchEvents = upcomingEvents.filter((e) => e.skillGapMatch >= 80);
+      if (highMatchEvents.length > 0) {
+        toast({
+          title: (
+            <span className="flex items-center gap-2">
+              <Bell className="w-4 h-4" />
+              New Events Available!
+            </span>
+          ) as unknown as string,
+          description: `${highMatchEvents.length} event${highMatchEvents.length > 1 ? 's' : ''} matching your skill gaps (80%+ match)`,
+        });
+      }
+    }
+  }, []); // Only run once on mount
 
   const handleStartCompletion = (event: Event) => {
     setSelectedEvent(event);
