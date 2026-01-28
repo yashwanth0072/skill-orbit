@@ -16,6 +16,7 @@ interface UserSettings {
   reverseHiringEnabled: boolean;
   emailNotifications: boolean;
   opportunityAlerts: boolean;
+  eventNotifications: boolean;
 }
 
 interface AppContextType {
@@ -58,6 +59,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     reverseHiringEnabled: true,
     emailNotifications: true,
     opportunityAlerts: true,
+    eventNotifications: true,
   });
 
   const updateOpportunityStatus = (id: string, status: 'accepted' | 'declined') => {

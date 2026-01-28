@@ -118,6 +118,24 @@ export default function Settings() {
 
             <div className="flex items-center justify-between">
               <div className="space-y-1">
+                <Label htmlFor="event-notifications" className="text-base font-medium">
+                  Event Notifications
+                </Label>
+                <p className="text-sm text-muted-foreground">
+                  Get notified about new events matching your skill gaps.
+                </p>
+              </div>
+              <Switch
+                id="event-notifications"
+                checked={settings.eventNotifications}
+                onCheckedChange={(checked) => updateSetting('eventNotifications', checked)}
+              />
+            </div>
+
+            <Separator />
+
+            <div className="flex items-center justify-between">
+              <div className="space-y-1">
                 <Label htmlFor="email-notifications" className="text-base font-medium flex items-center gap-2">
                   <Mail className="w-4 h-4" />
                   Email Notifications
@@ -131,6 +149,14 @@ export default function Settings() {
                 checked={settings.emailNotifications}
                 onCheckedChange={(checked) => updateSetting('emailNotifications', checked)}
               />
+            </div>
+
+            <div className="bg-secondary/50 rounded-xl p-4 mt-4">
+              <h4 className="text-sm font-medium text-foreground mb-2">Email integration:</h4>
+              <p className="text-sm text-muted-foreground">
+                Email notifications will be sent when connected to a backend service. 
+                For now, you'll receive in-app notifications for new events.
+              </p>
             </div>
           </CardContent>
         </Card>
