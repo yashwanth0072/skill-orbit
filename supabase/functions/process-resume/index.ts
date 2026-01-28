@@ -1,5 +1,6 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { encode as base64Encode } from "https://deno.land/std@0.168.0/encoding/base64.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -62,9 +63,9 @@ serve(async (req) => {
 
     console.log(`Processing resume: ${file.name}, size: ${file.size} bytes`);
 
-    // Read file as base64 for AI processing
+    // Read file as base64 for AI processing - use Deno's base64 encoder to avoid stack overflow
     const arrayBuffer = await file.arrayBuffer();
-    const base64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
+    const base64 = base64Encode(arrayBuffer);
 
     // Use Lovable AI Gateway to extract resume data
     const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
