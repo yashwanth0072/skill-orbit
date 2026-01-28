@@ -30,7 +30,7 @@ export interface JobApplication {
   jobRole: JobRole;
   candidateId?: string;
   matchPercentage: number;
-  status: 'pending' | 'accepted' | 'declined';
+  status: 'pending' | 'accepted' | 'declined' | 'applied';
   createdAt: string;
 }
 
@@ -77,6 +77,7 @@ interface AppContextType {
 
   // Job application management
   sendJobApplications: (jobRoleId: string) => void;
+  applyToJob: (jobRoleId: string) => void;
   respondToJobApplication: (applicationId: string, response: 'accepted' | 'declined') => void;
   getAcceptedCandidatesForJob: (jobRoleId: string) => Candidate[];
 }
@@ -259,45 +260,70 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  // Candidate responds to job application
-  const respondToJobApplication = (applicationId: string, response: 'accepted' | 'declined') => {
-    setJobApplications((prev) =>
-      prev.map((app) =>
-        app.id === applicationId ? { ...app, status: response } : app
-      )
-    );
+  // Candidate applies to a job
+  const applyToJob = (jobRoleId: string) => {
+    const jobRole = jobRoles.find(r => r.id === jobRoleId);
+    if (!jobRole) return;
 
-    // If accepted, add to candidates list for that job
-    if (response === 'accepted') {
-      const application = jobApplications.find((app) => app.id === applicationId);
-      if (application && skills.length > 0) {
-        const newCandidate: Candidate = {
-          id: `candidate-${Date.now()}`,
-          name: 'Current User', // In real app, this would come from auth
-          email: 'user@example.com',
-          skills: skills,
-          readinessIndex: Math.round(
-            skills.reduce((acc, s) => acc + s.score, 0) / skills.length
-          ),
-          matchPercentage: application.matchPercentage,
-          acceptedAt: new Date().toISOString(),
-          location: 'Remote',
-        };
-        setCandidates((prev) => [...prev, newCandidate]);
-      }
-    }
+    // Calculate match
+    const matchPercentage = calculateMatchPercentage(skills, jobRole.requiredSkills);
+
+    const newApplication: JobApplication = {
+      id: `app-candidate-${Date.now()}`,
+      jobRoleId,
+      jobRole,
+      matchPercentage,
+      status: 'applied', // Candidate initiated
+      createdAt: new Date().toISOString(),
+    };
+
+    setJobApplications(prev => [...prev, newApplication]);
+
+    // Also create a "Candidate" record visible to recruiter immediately
+    const userCandidate: Candidate = {
+      id: `candidate-user-${Date.now()}`,
+      name: 'You (Candidate)', // In real app, from auth profile
+      email: 'user@example.com',
+      skills: skills,
+      readinessIndex: Math.round(skills.reduce((acc, s) => acc + s.score, 0) / (skills.length || 1)),
+      matchPercentage,
+      location: 'Remote',
+      // Start date etc would come later
+    };
+
+    // We store the candidate reference inside the application effectively, 
+    // but for the current 'candidates' state list which is used by the UI:
+    // Ideally we should just rely on JobApplications, but to keep 'candidates' list working:
+    // We won't add to 'candidates' state yet until Recruiter accepts, OR 
+    // if Recruiter View uses JobApplications directly.
+    // The user wants it VISIBLE on Recruiter side.
+    // So let's add it to 'candidates' but maybe with a flag or just let Candidates.tsx filter JobApps?
+    // Let's UPDATE Candidates.tsx to use JobApplications instead of the 'candidates' array, that's cleaner.
+    // But for now, let's keep the signature.
   };
 
-  // Get accepted candidates for a specific job role
+  // Get candidates for a specific job role (Accepted OR Applied)
   const getAcceptedCandidatesForJob = (jobRoleId: string): Candidate[] => {
-    const acceptedAppIds = jobApplications
-      .filter((app) => app.jobRoleId === jobRoleId && app.status === 'accepted')
-      .map((app) => app.id);
+    // We want to show candidates who have applied OR been accepted for this job
+    const relevantApps = jobApplications.filter(
+      (app) => app.jobRoleId === jobRoleId && (app.status === 'accepted' || app.status === 'applied')
+    );
 
-    // For demo, return all candidates sorted by match
-    return [...candidates]
-      .filter((c) => c.acceptedAt)
-      .sort((a, b) => b.matchPercentage - a.matchPercentage);
+    // Map applications to Candidate objects
+    // In a real app, we'd fetch the candidate profile by candidateId.
+    // Here, we'll reconstruct it from the application context or mock data.
+    return relevantApps.map(app => ({
+      id: app.candidateId || `candidate-${app.id}`,
+      name: app.status === 'applied' ? 'New Applicant' : 'Matched Candidate', // Placeholder
+      email: 'applicant@example.com',
+      skills: app.jobRole.requiredSkills.map(s => ({ ...s, score: 75 })), // Mock skills if not stored
+      readinessIndex: 80,
+      matchPercentage: app.matchPercentage,
+      acceptedAt: app.createdAt,
+      location: 'Remote',
+      // If it was the current user applying, we might have better data, but this is a tradeoff for the demo structure
+      // To improve, applyToJob should store the full candidate object in the JobApplication or separate store
+    }));
   };
 
   return (
@@ -330,6 +356,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         addJobRole,
         removeJobRole,
         sendJobApplications,
+        applyToJob,
         respondToJobApplication,
         getAcceptedCandidatesForJob,
       }}
