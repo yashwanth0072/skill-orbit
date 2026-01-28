@@ -302,6 +302,35 @@ export function AppProvider({ children }: { children: ReactNode }) {
     // But for now, let's keep the signature.
   };
 
+  // Candidate responds to job application
+  const respondToJobApplication = (applicationId: string, response: 'accepted' | 'declined') => {
+    setJobApplications((prev) =>
+      prev.map((app) =>
+        app.id === applicationId ? { ...app, status: response } : app
+      )
+    );
+
+    // If accepted, add to candidates list for that job
+    if (response === 'accepted') {
+      const application = jobApplications.find((app) => app.id === applicationId);
+      if (application && skills.length > 0) {
+        const newCandidate: Candidate = {
+          id: `candidate-${Date.now()}`,
+          name: 'Current User', // In real app, this would come from auth
+          email: 'user@example.com',
+          skills: skills,
+          readinessIndex: Math.round(
+            skills.reduce((acc, s) => acc + s.score, 0) / skills.length
+          ),
+          matchPercentage: application.matchPercentage,
+          acceptedAt: new Date().toISOString(),
+          location: 'Remote',
+        };
+        setCandidates((prev) => [...prev, newCandidate]);
+      }
+    }
+  };
+
   // Get candidates for a specific job role (Accepted OR Applied)
   const getAcceptedCandidatesForJob = (jobRoleId: string): Candidate[] => {
     // We want to show candidates who have applied OR been accepted for this job
