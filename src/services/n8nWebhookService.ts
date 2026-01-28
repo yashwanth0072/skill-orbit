@@ -2,8 +2,8 @@
 
 import { ResumeData } from '@/lib/resumeTypes';
 
-// Placeholder for n8n webhook URL - will be configured later
-let RESUME_WEBHOOK_URL: string | null = null;
+// n8n webhook URL - exposed via ngrok
+let RESUME_WEBHOOK_URL: string | null = 'http://localhost:5678/webhook-test/get-resume';
 
 export const setResumeWebhookUrl = (url: string) => {
   RESUME_WEBHOOK_URL = url;
