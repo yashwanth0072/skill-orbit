@@ -30,13 +30,6 @@ export default function Auth() {
 
     try {
       await signInWithPopup(auth, googleProvider);
-
-      // Force navigation to the selected role's dashboard
-      if (selectedRole === 'recruiter') {
-        navigate('/recruiter');
-      } else {
-        navigate('/dashboard');
-      }
     } catch (err) {
       console.error('Firebase Auth Error:', err);
       toast({
