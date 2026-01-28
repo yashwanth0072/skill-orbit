@@ -64,7 +64,7 @@ export default function Landing() {
               <div className="w-10 h-10 rounded-xl gradient-primary flex items-center justify-center shadow-glow">
                 <Orbit className="w-6 h-6 text-primary-foreground" />
               </div>
-              <span className="font-display font-bold text-xl text-foreground">Skill Orbith</span>
+              <span className="font-display font-bold text-xl text-foreground">Skill Orbit</span>
             </Link>
 
             <div className="flex items-center gap-4">

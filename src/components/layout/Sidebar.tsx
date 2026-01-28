@@ -66,7 +66,7 @@ export function Sidebar() {
               animate={{ opacity: 1 }}
               className="font-display font-bold text-xl text-foreground"
             >
-              Skill Orbith
+              Skill Orbit
             </motion.span>
           )}
         </Link>

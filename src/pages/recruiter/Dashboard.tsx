@@ -21,9 +21,11 @@ export default function RecruiterDashboard() {
   const acceptedCandidates = candidates.filter((c) => c.acceptedAt);
   const jobRole = mockJobRoles[0];
 
-  const avgMatchPercentage = Math.round(
-    acceptedCandidates.reduce((sum, c) => sum + c.matchPercentage, 0) / acceptedCandidates.length
-  );
+  const avgMatchPercentage = acceptedCandidates.length > 0 
+    ? Math.round(
+        acceptedCandidates.reduce((sum, c) => sum + c.matchPercentage, 0) / acceptedCandidates.length
+      )
+    : 0;
 
   return (
     <motion.div
