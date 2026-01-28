@@ -23,21 +23,6 @@ export interface WebhookResponse {
   error?: string;
 }
 
-// Helper to convert File to base64
-const fileToBase64 = (file: File): Promise<string> => {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = () => {
-      const result = reader.result as string;
-      // Remove the data:application/pdf;base64, prefix
-      const base64 = result.split(',')[1];
-      resolve(base64);
-    };
-    reader.onerror = (error) => reject(error);
-  });
-};
-
 export const uploadResumeToN8n = async (file: File): Promise<WebhookResponse> => {
   if (!RESUME_WEBHOOK_URL) {
     return {
@@ -47,20 +32,15 @@ export const uploadResumeToN8n = async (file: File): Promise<WebhookResponse> =>
   }
 
   try {
-    const base64Content = await fileToBase64(file);
+    // Create FormData to send the file as multipart/form-data
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('filename', file.name);
+    formData.append('timestamp', new Date().toISOString());
     
     const response = await fetch(RESUME_WEBHOOK_URL, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        filename: file.name,
-        fileType: file.type,
-        fileSize: file.size,
-        content: base64Content,
-        timestamp: new Date().toISOString(),
-      }),
+      body: formData,
     });
 
     if (!response.ok) {
