@@ -30,7 +30,13 @@ export default function Auth() {
 
     try {
       await signInWithPopup(auth, googleProvider);
-      // Firebase automatically handles the auth state change which AppContext listens to
+
+      // Force navigation to the selected role's dashboard
+      if (selectedRole === 'recruiter') {
+        navigate('/recruiter');
+      } else {
+        navigate('/dashboard');
+      }
     } catch (err) {
       console.error('Firebase Auth Error:', err);
       toast({
