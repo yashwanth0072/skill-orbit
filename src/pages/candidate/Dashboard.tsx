@@ -194,16 +194,16 @@ export default function CandidateDashboard() {
                   key={opp.id}
                   className="p-4 rounded-xl bg-secondary/50 border border-border hover:border-primary/20 transition-colors"
                 >
-                  <div className="flex items-start justify-between mb-2">
-                    <div>
-                      <h4 className="font-medium text-foreground">{opp.title}</h4>
+                  <div className="flex items-start gap-3 mb-3">
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-medium text-foreground truncate">{opp.title}</h4>
                       <p className="text-sm text-muted-foreground">{opp.company}</p>
                     </div>
-                    <StatusBadge status={opp.status} />
+                    <StatusBadge status={opp.status} className="flex-shrink-0" />
                   </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-muted-foreground">{opp.location}</span>
-                    <span className="text-sm font-semibold text-primary">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-muted-foreground truncate">{opp.location}</span>
+                    <span className="font-semibold text-primary flex-shrink-0 ml-2">
                       {opp.matchPercentage}% match
                     </span>
                   </div>
