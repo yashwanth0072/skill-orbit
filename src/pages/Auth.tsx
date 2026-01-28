@@ -37,7 +37,6 @@ export default function Auth() {
         description: err instanceof Error ? err.message : 'An error occurred',
         variant: 'destructive',
       });
-    } finally {
       setIsGoogleLoading(false);
     }
   };
