@@ -31,6 +31,7 @@ const candidateNavItems = [
 const recruiterNavItems = [
   { icon: LayoutDashboard, label: 'Dashboard', path: '/recruiter' },
   { icon: FileText, label: 'Job Roles', path: '/recruiter/jobs' },
+  { icon: Calendar, label: 'Events', path: '/recruiter/events' },
   { icon: Users, label: 'Candidates', path: '/recruiter/candidates' },
   { icon: Settings, label: 'Settings', path: '/recruiter/settings' },
 ];

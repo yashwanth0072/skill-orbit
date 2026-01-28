@@ -23,6 +23,7 @@ import Settings from "./pages/candidate/Settings";
 import RecruiterDashboard from "./pages/recruiter/Dashboard";
 import Candidates from "./pages/recruiter/Candidates";
 import JobRoles from "./pages/recruiter/JobRoles";
+import RecruiterEvents from "./pages/recruiter/Events";
 
 // Layout
 import { DashboardLayout } from "./components/layout/DashboardLayout";
@@ -84,6 +85,7 @@ function AppRoutes() {
         {/* Recruiter Routes */}
         <Route path="/recruiter" element={<RecruiterDashboard />} />
         <Route path="/recruiter/jobs" element={<JobRoles />} />
+        <Route path="/recruiter/events" element={<RecruiterEvents />} />
         <Route path="/recruiter/candidates" element={<Candidates />} />
         <Route path="/recruiter/settings" element={<Settings />} />
       </Route>
