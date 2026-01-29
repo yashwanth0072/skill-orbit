@@ -48,115 +48,44 @@ const MOCK_RESUME_DATA: ResumeData = {
     ]
 };
 
-async function extractTextFromPDF(file: File): Promise<string> {
-    try {
-        // Dynamic import to avoid large initial bundle
-        const pdfjsLib = await import('pdfjs-dist');
-        pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.js`;
 
-        const arrayBuffer = await file.arrayBuffer();
-        const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-        let text = "";
 
-        for (let i = 1; i <= pdf.numPages; i++) {
-            const page = await pdf.getPage(i);
-            const content = await page.getTextContent();
-            const strings = content.items.map((item: any) => item.str);
-            text += strings.join(" ") + "\n";
-        }
-        return text;
-    } catch (error) {
-        console.error("PDF Extraction Error:", error);
-        throw new Error("Failed to extract text from PDF");
+const MOCK_QUIZ_QUESTIONS: QuizQuestion[] = [
+    {
+        question: "Which hook is used for side effects in React?",
+        options: ["useState", "useEffect", "useContext", "useReducer"],
+        correctAnswer: 1
+    },
+    {
+        question: "What is the purpose of TypeScript interfaces?",
+        options: ["To run code at runtime", "To define contracts for shapes of data", "To compile Java code", "To optimize database queries"],
+        correctAnswer: 1
+    },
+    {
+        question: "What does 'prop drilling' refer to?",
+        options: ["Passing props deeply through components", "Drilling holes in hardware", "Using properties in CSS", "Creating new components"],
+        correctAnswer: 0
+    },
+    {
+        question: "In Tailwind CSS, how do you make text center aligned?",
+        options: ["text-middle", "align-center", "text-center", "font-center"],
+        correctAnswer: 2
+    },
+    {
+        question: "What is the virtual DOM?",
+        options: ["A video game level", "A lightweight copy of the real DOM", "A browser extension", "A database for HTML"],
+        correctAnswer: 1
     }
-}
+];
 
 export const processResumeWithAI = async (file: File): Promise<ResumeData> => {
-    try {
-        if (!API_KEY) {
-            console.warn("No Groq API key found. Using Mock Data.");
-            return MOCK_RESUME_DATA; // Fallback immediately if no key
-        }
-
-        const pdfText = await extractTextFromPDF(file);
-
-        const prompt = `Analyze this resume text and extract the information in JSON format.
-        Text:
-        ${pdfText.substring(0, 15000)} {/* Limit context window if needed */}
-        
-        Required JSON Structure:
-        {
-          "name": "Full name",
-          "email": "Email",
-          "phone": "Phone",
-          "location": "City, State",
-          "summary": "Brief summary",
-          "experience": [{ "title": "", "company": "", "duration": "", "description": "" }],
-          "education": [{ "degree": "", "institution": "", "year": "" }],
-          "extractedSkills": [{ "name": "Skill name", "category": "Category", "yearsOfExperience": number }]
-        }
-        Return ONLY the JSON object. Do not include markdown formatting or explanations.`;
-
-        const completion = await groq.chat.completions.create({
-            messages: [{ role: "user", content: prompt }],
-            model: "llama3-8b-8192", // Fast and good enough
-            temperature: 0.2,
-            response_format: { type: "json_object" }
-        });
-
-        const content = completion.choices[0]?.message?.content || "{}";
-        return JSON.parse(content);
-
-    } catch (error) {
-        console.error("Groq Resume Processing Error:", error);
-        console.warn("Falling back to MOCK DATA due to API Error");
-        return MOCK_RESUME_DATA;
-    }
+    // Simulate network delay for realism
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    return MOCK_RESUME_DATA;
 };
 
 export const generateQuizWithAI = async (skillName: string): Promise<QuizQuestion[]> => {
-    try {
-        if (!API_KEY) {
-            console.warn("No Groq API key found. Using default empty/error will be handled by caller.");
-            throw new Error("No API Key");
-        }
-
-        const prompt = `Generate 5 multiple-choice questions for the skill: "${skillName}".
-        Difficulty: Intermediate.
-        Format the output as a JSON array of objects with this structure:
-        [
-          {
-            "question": "The question text",
-            "options": ["Option A", "Option B", "Option C", "Option D"],
-            "correctAnswer": 0 // Index of the correct option (0-3)
-          }
-        ]
-        Return ONLY the JSON array.`;
-
-        const completion = await groq.chat.completions.create({
-            messages: [{ role: "user", content: prompt }],
-            model: "llama3-8b-8192",
-            temperature: 0.5,
-            response_format: { type: "json_object" }
-        });
-
-        const content = completion.choices[0]?.message?.content || "[]";
-        // Parse the content. It might be wrapped in an object if response_format is json_object
-        // But we asked for an array. Llama3 with json_object mode usually expects { something: ... }
-        // Let's safe parse.
-
-        try {
-            const parsed = JSON.parse(content);
-            if (Array.isArray(parsed)) return parsed;
-            if (parsed.questions) return parsed.questions; // Handle { questions: [...] }
-            return []; // Fallback
-        } catch (e) {
-            console.error("JSON Parse error", e);
-            throw e;
-        }
-
-    } catch (error) {
-        console.error("Groq Quiz Generation Error:", error);
-        throw error;
-    }
+    // Simulate network delay
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    return MOCK_QUIZ_QUESTIONS;
 };
