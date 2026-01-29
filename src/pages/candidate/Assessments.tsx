@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { generateQuizWithGemini } from '@/lib/gemini';
+import { generateQuizWithAI } from '@/lib/ai';
 import { toast } from '@/hooks/use-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useApp } from '@/contexts/AppContext';
@@ -52,8 +52,8 @@ export default function Assessments() {
 
     try {
       const skillName = skills.find(s => s.id === skillId)?.name || 'General Skill';
-      // Call Gemini API
-      const generatedQuestions = await generateQuizWithGemini(skillName);
+      // Call AI API
+      const generatedQuestions = await generateQuizWithAI(skillName);
 
       // Map to AssessmentQuestion interface (add ids)
       const formattedQuestions = generatedQuestions.map((q: any, i: number) => ({
