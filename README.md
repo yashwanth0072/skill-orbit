@@ -19,10 +19,10 @@ Instead of candidates spamming applications, **Skill Orbit** empowers them.
 - **Verified Profiles**: Candidates focus on showcasing proven skills.
 - **Recruiter Outreach**: Companies browse top talent and "apply" to *them* with tailored opportunities.
 
-### 2. Intelligent Profile Synthesis (Powered by Gemini)
-Leveraging Google's Gemini 1.5 Flash model for deep understanding:
-- **Instant Resume Parsing**: Drag & drop a PDF to instantly extract skills, experience, and projects into a structured profile.
-- **Adaptive Skill Assessments**: Dynamic AI-generated quizzes that adapt complexity based on the candidate's answers.
+### 2. Intelligent Profile Synthesis (Simulated for Demo)
+For this hackathon demonstration, we are using **high-fidelity mock data** to simulate the AI experience instantly and reliably.
+- **Instant Resume Parsing**: Upload any PDF to see our parsing UI in action (simulated response).
+- **Adaptive Skill Assessments**: Experience the quiz flow with pre-generated questions.
 - **Readiness Index**: Visual "Skill Gap Analysis" to show candidates exactly what they need for their dream roles.
 
 ### 3. Integrated Ecosystem
