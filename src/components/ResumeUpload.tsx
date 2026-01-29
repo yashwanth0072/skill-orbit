@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
 import { ResumeData, ResumeUploadState } from '@/lib/resumeTypes';
-import { processResumeWithGemini } from '@/lib/gemini';
+import { processResumeWithAI } from '@/lib/gemini';
 import {
   Upload,
   FileText,
@@ -106,7 +106,7 @@ export function ResumeUpload({ onResumeProcessed }: ResumeUploadProps) {
         isProcessing: true,
       }));
 
-      const data = await processResumeWithGemini(selectedFile);
+      const data = await processResumeWithAI(selectedFile);
 
       setUploadState({
         isUploading: false,
