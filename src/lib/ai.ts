@@ -1,15 +1,11 @@
 
 import Groq from "groq-sdk";
 import { ResumeData } from "./resumeTypes";
-import * as pdfjsLib from 'pdfjs-dist';
 
 // Initialize Groq
 // Note: In production, this key should be proxied or limited.
 const API_KEY = import.meta.env.VITE_GROQ_API_KEY || "";
 const groq = new Groq({ apiKey: API_KEY, dangerouslyAllowBrowser: true });
-
-// Configure PDF.js worker
-pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.js`;
 
 interface QuizQuestion {
     question: string;
@@ -54,6 +50,10 @@ const MOCK_RESUME_DATA: ResumeData = {
 
 async function extractTextFromPDF(file: File): Promise<string> {
     try {
+        // Dynamic import to avoid large initial bundle
+        const pdfjsLib = await import('pdfjs-dist');
+        pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.js`;
+
         const arrayBuffer = await file.arrayBuffer();
         const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
         let text = "";
