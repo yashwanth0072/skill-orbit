@@ -125,7 +125,6 @@
   body {
     @apply bg-background text-foreground antialiased;
     font-family: 'Inter', system-ui, sans-serif;
-    zoom: 0.85;
   }
 
   h1,
