@@ -4,9 +4,8 @@ import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useApp } from '@/contexts/AppContext';
-import { auth, googleProvider } from '@/integrations/firebase/config';
-import { signInWithPopup } from 'firebase/auth';
 import { Orbit, User, Building2, ArrowRight } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 
 export default function Auth() {
@@ -15,6 +14,73 @@ export default function Auth() {
   // Pre-select based on context (which might come from Landing or localStorage)
   const [selectedRole, setSelectedRole] = useState<'candidate' | 'recruiter' | null>(userRole);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [isEmailLoading, setIsEmailLoading] = useState(false);
+
+  const handleEmailSignIn = async () => {
+    if (!selectedRole) {
+      toast({ title: 'Please select a role first', variant: 'destructive' });
+      return;
+    }
+
+    setIsEmailLoading(true);
+    setUserRole(selectedRole);
+    localStorage.setItem('userRole', selectedRole);
+
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      if (error) throw error;
+      // onAuthStateChange handles the rest
+    } catch (err) {
+      toast({
+        title: 'Login failed',
+        description: err instanceof Error ? err.message : 'Invalid credentials',
+        variant: 'destructive',
+      });
+      setIsEmailLoading(false);
+    }
+  };
+
+  const handleEmailSignUp = async () => {
+    if (!selectedRole) {
+      toast({ title: 'Please select a role first', variant: 'destructive' });
+      return;
+    }
+
+    setIsEmailLoading(true);
+    setUserRole(selectedRole);
+    localStorage.setItem('userRole', selectedRole);
+
+    try {
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            full_name: email.split('@')[0],
+          }
+        }
+      });
+      if (error) throw error;
+
+      toast({
+        title: 'Account created!',
+        description: 'Check your email to confirm, or check logs if in test mode.',
+      });
+    } catch (err) {
+      toast({
+        title: 'Sign up failed',
+        description: err instanceof Error ? err.message : 'Error creating account',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsEmailLoading(false);
+    }
+  };
 
   const handleContinue = async () => {
     if (selectedRole) {
@@ -29,9 +95,18 @@ export default function Auth() {
     setIsGoogleLoading(true);
 
     try {
-      await signInWithPopup(auth, googleProvider);
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/`,
+        },
+      });
+
+      if (error) throw error;
+
+      // Note: User will be redirected to Google, so execution might pause/end here.
     } catch (err) {
-      console.error('Firebase Auth Error:', err);
+      console.error('Auth Error:', err);
       toast({
         title: 'Sign in failed',
         description: err instanceof Error ? err.message : 'An error occurred',
@@ -134,6 +209,53 @@ export default function Auth() {
                 </div>
               </div>
             </motion.button>
+
+            {/* Email Form */}
+            <div className="space-y-3 pt-4 border-t border-border">
+              <input
+                type="email"
+                placeholder="Email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              />
+              <input
+                type="password"
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              />
+              <div className="flex gap-2">
+                <Button
+                  onClick={handleEmailSignIn}
+                  disabled={!selectedRole || isEmailLoading || isGoogleLoading || !email || !password}
+                  className="flex-1"
+                  variant="default"
+                >
+                  {isEmailLoading ? '...' : 'Login'}
+                </Button>
+                <Button
+                  onClick={handleEmailSignUp}
+                  disabled={!selectedRole || isEmailLoading || isGoogleLoading || !email || !password}
+                  className="flex-1"
+                  variant="secondary"
+                >
+                  Sign Up
+                </Button>
+              </div>
+            </div>
+
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-background px-2 text-muted-foreground">
+                  Or continue with
+                </span>
+              </div>
+            </div>
 
             <Button
               onClick={handleContinue}

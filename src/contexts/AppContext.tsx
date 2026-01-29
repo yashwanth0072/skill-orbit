@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
+import { toast } from '@/hooks/use-toast';
 import {
   Skill,
   Opportunity,
@@ -11,8 +12,7 @@ import {
   Candidate,
   calculateMatchPercentage,
 } from '@/lib/mockData';
-import { auth } from '@/integrations/firebase/config';
-import { onAuthStateChanged } from 'firebase/auth';
+import { supabase } from '@/integrations/supabase/client';
 
 type UserRole = 'candidate' | 'recruiter';
 
@@ -125,96 +125,174 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   // Initialize auth listener
   React.useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setIsAuthenticated(!!user);
-      setIsLoading(false);
+    let mounted = true;
+
+    async function initSession() {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+
+        if (session?.user) {
+          setIsAuthenticated(true);
+
+          // Fetch Role
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', session.user.id)
+            .single();
+
+          if (profile && mounted) {
+            setUserRole(profile.role as UserRole);
+          }
+        }
+      } catch (e) {
+        console.error('Error during auth init:', e);
+      } finally {
+        if (mounted) setIsLoading(false);
+      }
+    }
+
+    initSession();
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      if (session?.user) {
+        setIsAuthenticated(true);
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', session.user.id)
+          .single();
+
+        if (profile) {
+          setUserRole(profile.role as UserRole);
+        } else {
+          const storedRole = localStorage.getItem('userRole') as UserRole || 'candidate';
+          const newProfile = {
+            id: session.user.id,
+            role: storedRole,
+            email: session.user.email,
+            full_name: session.user.user_metadata?.full_name || session.user.email?.split('@')[0],
+            avatar_url: session.user.user_metadata?.avatar_url
+          };
+
+          const { error } = await supabase.from('profiles').insert(newProfile);
+          if (!error) {
+            setUserRole(storedRole);
+          } else {
+            console.error('Error creating profile:', error);
+          }
+        }
+      } else {
+        setIsAuthenticated(false);
+      }
     });
 
-    return () => unsubscribe();
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
-  // Load skills from localStorage on init - only populated after resume upload
-  const [skills, setSkillsState] = useState<Skill[]>(loadPersistedSkills);
+  // State Initialization
+  const [skills, setSkillsState] = useState<Skill[]>([]);
   const [opportunities, setOpportunities] = useState<Opportunity[]>(mockOpportunities);
   const [events, setEventsState] = useState<Event[]>(mockEvents);
   const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [settings, setSettingsState] = useState<UserSettings>(loadPersistedSettings);
-  // Load jobs from localStorage or fallback to mock
-  const [jobRoles, setJobRolesState] = useState<JobRole[]>(() => {
-    try {
-      const stored = localStorage.getItem('jobRoles');
-      return stored ? JSON.parse(stored) : mockJobRoles;
-    } catch {
-      return mockJobRoles;
-    }
-  });
+  const [jobRoles, setJobRolesState] = useState<JobRole[]>([]);
+  const [jobApplications, setJobApplicationsState] = useState<JobApplication[]>([]);
 
-  // Load applications from localStorage
-  const [jobApplications, setJobApplicationsState] = useState<JobApplication[]>(() => {
-    try {
-      const stored = localStorage.getItem('jobApplications');
-      return stored ? JSON.parse(stored) : [];
-    } catch {
-      return [];
-    }
-  });
+  // Fetch Data from Supabase
+  React.useEffect(() => {
+    if (!isAuthenticated) return;
 
-  // Wrapper to persist jobRoles
-  const setJobRoles: React.Dispatch<React.SetStateAction<JobRole[]>> = (value) => {
-    setJobRolesState((prev) => {
-      const newVal = typeof value === 'function' ? value(prev) : value;
-      localStorage.setItem('jobRoles', JSON.stringify(newVal));
-      return newVal;
-    });
-  };
-
-  // Wrapper to persist jobApplications
-  const setJobApplications: React.Dispatch<React.SetStateAction<JobApplication[]>> = (value) => {
-    setJobApplicationsState((prev) => {
-      const newVal = typeof value === 'function' ? value(prev) : value;
-      localStorage.setItem('jobApplications', JSON.stringify(newVal));
-      return newVal;
-    });
-  };
-
-  // Wrapper to persist skills to localStorage
-  const setSkills: React.Dispatch<React.SetStateAction<Skill[]>> = (value) => {
-    setSkillsState((prev) => {
-      const newSkills = typeof value === 'function' ? value(prev) : value;
+    const loadData = async () => {
       try {
-        localStorage.setItem('candidateSkills', JSON.stringify(newSkills));
-      } catch (e) {
-        console.error('Failed to persist skills:', e);
-      }
-      return newSkills;
-    });
-  };
+        // Fetch Job Roles
+        const { data: fetchedJobs, error: jobsError } = await supabase
+          .from('job_roles')
+          .select('*');
 
-  // Wrapper to persist settings to localStorage
-  const setSettings: React.Dispatch<React.SetStateAction<UserSettings>> = (value) => {
-    setSettingsState((prev) => {
-      const newSettings = typeof value === 'function' ? value(prev) : value;
-      try {
-        localStorage.setItem('candidateSettings', JSON.stringify(newSettings));
-      } catch (e) {
-        console.error('Failed to persist settings:', e);
-      }
-      return newSettings;
-    });
-  };
+        if (jobsError) console.error('Error fetching jobs:', jobsError);
 
-  // Wrapper to persist events to localStorage for live updates
-  const setEvents: React.Dispatch<React.SetStateAction<Event[]>> = (value) => {
-    setEventsState((prev) => {
-      const newEvents = typeof value === 'function' ? value(prev) : value;
-      try {
-        localStorage.setItem('platformEvents', JSON.stringify(newEvents));
-      } catch (e) {
-        console.error('Failed to persist events:', e);
+        if (fetchedJobs) {
+          const formattedJobs = fetchedJobs.map(job => ({
+            ...job,
+            requiredSkills: (job.required_skills as any) || [],
+            salaryRange: job.salary_range || '',
+            postedAt: job.posted_at
+          }));
+          setJobRolesState(formattedJobs as unknown as JobRole[]);
+        }
+
+        // Fetch Skills (for current user)
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const { data: fetchedSkills, error: skillsError } = await supabase
+            .from('candidate_skills')
+            .select('*')
+            .eq('user_id', user.id);
+
+          if (skillsError) console.error('Error fetching skills:', skillsError);
+
+          if (fetchedSkills) {
+            const mappedSkills = fetchedSkills.map(s => ({
+              id: s.id,
+              name: s.name,
+              category: s.category || '',
+              score: s.score || 0,
+              maxScore: s.max_score || 100,
+              targetScore: s.target_score || 80,
+              assessedAt: s.assessed_at || undefined,
+              status: s.status as 'pending' | 'assessed'
+            }));
+            setSkillsState(mappedSkills);
+          }
+
+          // Fetch Applications
+          const { data: fetchedApps, error: appsError } = await supabase
+            .from('job_applications')
+            .select(`
+              *,
+              job_role:job_roles (*)
+            `);
+
+          if (appsError) console.error('Error fetching apps:', appsError);
+
+          if (fetchedApps) {
+            const mappedApps: JobApplication[] = fetchedApps.map(app => ({
+              id: app.id,
+              jobRoleId: app.job_role_id,
+              jobRole: {
+                ...(app.job_role as any),
+                requiredSkills: ((app.job_role as any)?.required_skills as any) || [],
+                salaryRange: (app.job_role as any)?.salary_range || '',
+                postedAt: (app.job_role as any)?.posted_at
+              },
+              candidateId: app.candidate_id,
+              matchPercentage: app.match_percentage || 0,
+              status: app.status as 'pending' | 'accepted' | 'declined' | 'applied',
+              createdAt: app.created_at
+            }));
+            setJobApplicationsState(mappedApps);
+          }
+        }
+      } catch (error) {
+        console.error('Error loading Supabase data:', error);
       }
-      return newEvents;
-    });
-  };
+    };
+
+    loadData();
+  }, [isAuthenticated]);
+
+  // Wrappers to update state (Direct setters for now, logic handled in actions)
+  const setJobRoles: React.Dispatch<React.SetStateAction<JobRole[]>> = setJobRolesState;
+  const setJobApplications: React.Dispatch<React.SetStateAction<JobApplication[]>> = setJobApplicationsState;
+  const setSkills: React.Dispatch<React.SetStateAction<Skill[]>> = setSkillsState;
+  const setSettings: React.Dispatch<React.SetStateAction<UserSettings>> = setSettingsState;
+  const setEvents: React.Dispatch<React.SetStateAction<Event[]>> = setEventsState;
 
   const updateOpportunityStatus = (id: string, status: 'accepted' | 'declined') => {
     setOpportunities((prev) =>
@@ -253,8 +331,40 @@ export function AppProvider({ children }: { children: ReactNode }) {
   };
 
   // Job role management
-  const addJobRole = (jobRole: JobRole) => {
+  const addJobRole = async (jobRole: JobRole) => {
     setJobRoles((prev) => [...prev, jobRole]);
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { error } = await supabase.from('job_roles').insert({
+          id: jobRole.id,
+          recruiter_id: user.id,
+          title: jobRole.title,
+          company: jobRole.company,
+          description: jobRole.description,
+          location: jobRole.location,
+          salary_range: jobRole.salaryRange,
+          required_skills: jobRole.requiredSkills,
+          posted_at: jobRole.postedAt
+        });
+        if (error) {
+          console.error('Error adding job role to DB:', error);
+          toast({
+            title: 'Error saving job',
+            description: error.message,
+            variant: 'destructive'
+          });
+        } else {
+          toast({
+            title: 'Job posted',
+            description: 'Your job role has been saved.',
+          });
+        }
+      }
+    } catch (e) {
+      console.error('Error in addJobRole:', e);
+    }
   };
 
   const removeJobRole = (jobRoleId: string) => {
@@ -296,15 +406,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
   };
 
   // Candidate applies to a job
-  const applyToJob = (jobRoleId: string) => {
+  const applyToJob = async (jobRoleId: string) => {
     const jobRole = jobRoles.find(r => r.id === jobRoleId);
     if (!jobRole) return;
 
     // Calculate match
     const matchPercentage = calculateMatchPercentage(skills, jobRole.requiredSkills);
 
+    // Create App object
     const newApplication: JobApplication = {
-      id: `app-candidate-${Date.now()}`,
+      id: crypto.randomUUID(),
       jobRoleId,
       jobRole,
       matchPercentage,
@@ -314,27 +425,29 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
     setJobApplications(prev => [...prev, newApplication]);
 
-    // Also create a "Candidate" record visible to recruiter immediately
-    const userCandidate: Candidate = {
-      id: `candidate-user-${Date.now()}`,
-      name: 'You (Candidate)', // In real app, from auth profile
-      email: 'user@example.com',
-      skills: skills,
-      readinessIndex: Math.round(skills.reduce((acc, s) => acc + s.score, 0) / (skills.length || 1)),
-      matchPercentage,
-      location: 'Remote',
-      // Start date etc would come later
-    };
+    // DB Insert
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { error } = await supabase.from('job_applications').insert({
+          id: newApplication.id,
+          job_role_id: jobRoleId,
+          candidate_id: user.id,
+          status: 'applied',
+          match_percentage: matchPercentage,
+          created_at: newApplication.createdAt
+        });
+        if (error) {
+          console.error("DB Apply Error", error);
+          toast({ title: 'Application failed', variant: 'destructive' });
+        } else {
+          toast({ title: 'Application sent!' });
+        }
+      }
+    } catch (e) { console.error(e); }
 
-    // We store the candidate reference inside the application effectively, 
-    // but for the current 'candidates' state list which is used by the UI:
-    // Ideally we should just rely on JobApplications, but to keep 'candidates' list working:
-    // We won't add to 'candidates' state yet until Recruiter accepts, OR 
-    // if Recruiter View uses JobApplications directly.
-    // The user wants it VISIBLE on Recruiter side.
-    // So let's add it to 'candidates' but maybe with a flag or just let Candidates.tsx filter JobApps?
-    // Let's UPDATE Candidates.tsx to use JobApplications instead of the 'candidates' array, that's cleaner.
-    // But for now, let's keep the signature.
+    // Also create a "Candidate" record visible to recruiter immediately (Optimistic UI only for now)
+    // In real App, Recruiter fetches this from DB via 'job_applications' table join
   };
 
   // Candidate responds to job application
