@@ -1,107 +1,116 @@
-# Skill Orbit 🚀
+# 🚀 Skill Orbit
+> **The Future of Recruitment: AI-Driven Reverse Hiring**
 
-**Skill Orbit** is a futuristic recruitment platform built for the **Fortex36 Hackathon**. It flips the traditional hiring model on its head with "Reverse Hiring," where companies apply to candidates based on verified skills, not just static resumes.
+[![React](https://img.shields.io/badge/React-18-blue?style=flat-square&logo=react)](https://reactjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue?style=flat-square&logo=typescript)](https://www.typescriptlang.org/)
+[![Vite](https://img.shields.io/badge/Vite-5.0-purple?style=flat-square&logo=vite)](https://vitejs.dev/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.4-38B2AC?style=flat-square&logo=tailwind-css)](https://tailwindcss.com/)
+[![Gemini AI](https://img.shields.io/badge/AI-Gemini_1.5_Flash-orange?style=flat-square&logo=google)](https://deepmind.google/technologies/gemini/)
 
-> **Note**: This project was built as a prototype for a hackathon and uses browser storage for demonstration purposes. It is not licensed for commercial use.
+**Skill Orbit** redefines the hiring landscape for the **Fortex36 Hackathon**. We flip the script with a **"Reverse Hiring"** model where companies apply to candidates based on verified skills, adaptive assessments, and AI-synthesized profiles.
+
+> [!NOTE] 
+> **Prototype Notice**: This application was developed as a hackathon entry. It utilizes browser storage for demonstration purposes and is intended as a proof-of-concept.
 
 ---
 
 ## 🌟 Key Features
 
-### 1. Reverse Hiring Model
-- Candidates showcase their verified skills and readiness.
-- Recruiters browse top talent and "apply" to candidates with job opportunities.
+### 1. Reverse Hiring Paradigm
+Instead of candidates spamming applications, **Skill Orbit** empowers them.
+- **Verified Profiles**: Candidates focus on showcasing proven skills.
+- **Recruiter Outreach**: Companies browse top talent and "apply" to *them* with tailored opportunities.
 
-### 2. AI-Powered Intelligence (Gemini)
-- **Smart Resume Parsing**: Upload a PDF resume, and our AI (Google Gemini) extracts skills, categorizes them, and builds your profile instantly.
-- **Adaptive Assessments**: Take AI-generated quizzes to verify your skills. The questions adapt to the specific skill you are testing.
-- **Skill Gap Analysis**: The system identifies missing skills for your target roles and visualizes your "Readiness Index."
+### 2. Intelligent Profile Synthesis (Powered by Gemini)
+Leveraging Google's Gemini 1.5 Flash model for deep understanding:
+- **Instant Resume Parsing**: Drag & drop a PDF to instantly extract skills, experience, and projects into a structured profile.
+- **Adaptive Skill Assessments**: Dynamic AI-generated quizzes that adapt complexity based on the candidate's answers.
+- **Readiness Index**: Visual "Skill Gap Analysis" to show candidates exactly what they need for their dream roles.
 
-### 3. Dual Dashboards
-- **Candidate Portal**: Track applications, view analytics on your profile, and search for learning events/hackathons to upskill.
-- **Recruiter Portal**: Post jobs, manage candidate pipelines, and configure company settings.
+### 3. Integrated Ecosystem
+- **Candidate Portal**: A personal command center for tracking applications, viewing profile analytics, and discovering hackathons/events.
+- **Recruiter Dashboard**: sophisticated tools for posting jobs, managing candidate pipelines, and configuring company branding.
 
-### 4. Interactive UX
-- Built with modern animations (Framer Motion) and a sleek, glassmorphic design system.
-- Real-time updates for job applications and status changes.
+### 4. Premium User Experience
+- **Glassmorphic Design**: A sleek, modern aesthetic using `shadcn/ui` and custom glassmorphism.
+- **Fluid Animations**: Powered by `Framer Motion` for seamless state transitions and interactions.
+- **Real-time Feedback**: Instant updates for application statuses and job matches.
 
 ---
 
-## 🛠️ Tech Stack
+## 🛠️ Technology Stack
 
-### Frontend & UI
-- **React 18** (Vite)
-- **TypeScript**
-- **Tailwind CSS**
-- **shadcn/ui** (Radix UI Components)
-- **Framer Motion** (Animations)
-- **Lucide React** (Icons)
+### Frontend Core
+- **Framework**: React 18 + Vite
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS + shadcn/ui (Radix UI)
+- **Animation**: Framer Motion
 
-### Backend & Services
-- **Firebase Authentication** (Google Sign-In & Email/Password)
-- **Google Generative AI SDK** (Gemini 1.5 Flash for Resume/Quiz)
-- **Local Storage** (For hackathon demo persistence without server latency)
-
-### Tools
-- **React Router** (Navigation)
-- **React Hook Form + Zod** (Form Validation)
-- **TanStack Query** (State Management)
+### AI & Services
+- **Generative AI**: Google Gemini SDK (Gemini 1.5 Flash)
+- **Authentication**: Firebase Auth (Google Sign-In + Email/Password)
+- **State Management**: TanStack Query (React Query)
+- **Forms**: React Hook Form + Zod
+- **Icons**: Lucide React
 
 ---
 
 ## 🚀 Getting Started
 
-Follow these steps to run the project locally.
+Follow these steps to deploy the local development environment.
 
 ### Prerequisites
-- Node.js (v18 or higher)
+- Node.js (v18+)
 - npm or yarn
-- A Google Cloud API Key (for Gemini)
+- Google Cloud API Key (for Gemini integration)
 
-### 1. Clone the Repository
-```bash
-git clone https://github.com/yourusername/skill-orbit.git
-cd skill-orbit
-```
+### Installation
 
-### 2. Install Dependencies
-```bash
-npm install
-```
+1.  **Clone the Repository**
+    ```bash
+    git clone https://github.com/yourusername/skill-orbit.git
+    cd skill-orbit
+    ```
 
-### 3. Configure Environment Variables
-Create a `.env` file in the root directory and add your keys:
-```env
-VITE_GEMINI_API_KEY=your_google_gemini_api_key
-```
-*(Note: Firebase config is currently embedded for the demo, but you can swap it for your own project in `src/integrations/firebase/config.ts`)*
+2.  **Install Application Dependencies**
+    ```bash
+    npm install
+    ```
 
-### 4. Run the Development Server
-```bash
-npm run dev
-```
-The app will open at `http://localhost:3000`.
+3.  **Environment Configuration**
+    Create a `.env` file in the root directory:
+    ```env
+    VITE_GEMINI_API_KEY=your_google_gemini_api_key
+    ```
+    *(Note: Firebase configuration is currently embedded for demo ease-of-use. For production, update `src/integrations/firebase/config.ts`)*
+
+4.  **Launch Development Server**
+    ```bash
+    npm run dev
+    ```
+    Access the application at `http://localhost:3000`.
 
 ---
 
-## 🎮 How to Demo
+## 🎮 Demo Walkthrough
 
-The app supports two user roles: **Candidate** and **Recruiter**.
+The application demonstrates two distinct workflows:
 
-### Scenario A: The Candidate Experience
-1.  **Login** as a Candidate.
-2.  **Upload Resume**: Drag & Drop your PDF resume on the Dashboard. Watch the AI extract your skills.
-3.  **Take Quiz**: Click "Take Assessment" to verify a skill.
-4.  **View Opportunities**: Check the "Opportunities" tab to see jobs posted by recruiters.
-5.  **Apply**: Click "Apply" on a job.
+### Scenario A: The Candidate
+1.  **Onboarding**: Log in and access the Candidate Dashboard.
+2.  **Profile Builder**: Upload a PDF resume. Watch Gemini analyze and populate your skills instantly.
+3.  **Validation**: Navigate to "Assessments" and take an AI-generated quiz to verify a specific skill.
+4.  **Discovery**: Browse the "Opportunities" tab to find recruiter outreach and relevant job postings.
+5.  **Action**: Apply to interested roles or register for suggested hackathons.
 
-### Scenario B: The Recruiter Experience
-1.  **Logout** and Login as a **Recruiter**.
-2.  **Post a Job**: Go to "Job Roles" -> "Post New Role". Add skills and salary info.
-3.  **Check Applicants**: Go to "Candidates" to see who applied (or who matches your criteria).
-4.  **Settings**: Visit "Settings" to configure your company profile.
+### Scenario B: The Recruiter
+1.  **Switch Role**: Log out and authenticate as a Recruiter.
+2.  **Talent Acquisition**: Browse the "Candidates" pool to find users with verified skills matching your needs.
+3.  **Job Management**: Navigate to "Job Roles" to create new listings with required skill sets and salary ranges.
+4.  **Organization**: Use "Settings" to customize your company profile and hiring preferences.
 
 ---
 
 ## 📄 License
-This project is open-source for educational and hackathon purposes. No specific license is attached.
+
+This project is open-source and created for educational purposes as part of the Fortex36 Hackathon.
