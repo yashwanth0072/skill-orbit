@@ -5,12 +5,10 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue?style=flat-square&logo=typescript)](https://www.typescriptlang.org/)
 [![Vite](https://img.shields.io/badge/Vite-5.0-purple?style=flat-square&logo=vite)](https://vitejs.dev/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.4-38B2AC?style=flat-square&logo=tailwind-css)](https://tailwindcss.com/)
+[![Supabase](https://img.shields.io/badge/Supabase-Database-green?style=flat-square&logo=supabase)](https://supabase.com/)
 [![Gemini AI](https://img.shields.io/badge/AI-Gemini_1.5_Flash-orange?style=flat-square&logo=google)](https://deepmind.google/technologies/gemini/)
 
-**Skill Orbit** redefines the hiring landscape for the **Fortex36 Hackathon**. We flip the script with a **"Reverse Hiring"** model where companies apply to candidates based on verified skills, adaptive assessments, and AI-synthesized profiles.
-
-> [!NOTE] 
-> **Prototype Notice**: This application was developed as a hackathon entry. It utilizes browser storage for demonstration purposes and is intended as a proof-of-concept.
+**Skill Orbit** redefines the hiring landscape. We flip the script with a **"Reverse Hiring"** model where companies apply to candidates based on verified skills, adaptive assessments, and AI-synthesized profiles.
 
 ---
 
@@ -34,7 +32,7 @@ Leveraging Google's Gemini 1.5 Flash model for deep understanding:
 ### 4. Premium User Experience
 - **Glassmorphic Design**: A sleek, modern aesthetic using `shadcn/ui` and custom glassmorphism.
 - **Fluid Animations**: Powered by `Framer Motion` for seamless state transitions and interactions.
-- **Real-time Feedback**: Instant updates for application statuses and job matches.
+- **Real-time Data**: Powered by **Supabase Realtime** for instant updates on applications and statuses.
 
 ---
 
@@ -46,11 +44,10 @@ Leveraging Google's Gemini 1.5 Flash model for deep understanding:
 - **Styling**: Tailwind CSS + shadcn/ui (Radix UI)
 - **Animation**: Framer Motion
 
-### AI & Services
+### Backend & AI
+- **Database & Auth**: Supabase (PostgreSQL + Auth)
 - **Generative AI**: Google Gemini SDK (Gemini 1.5 Flash)
-- **Authentication**: Firebase Auth (Google Sign-In + Email/Password)
 - **State Management**: TanStack Query (React Query)
-- **Forms**: React Hook Form + Zod
 - **Icons**: Lucide React
 
 ---
@@ -61,7 +58,7 @@ Follow these steps to deploy the local development environment.
 
 ### Prerequisites
 - Node.js (v18+)
-- npm or yarn
+- Supabase Project (Free Tier)
 - Google Cloud API Key (for Gemini integration)
 
 ### Installation
@@ -80,37 +77,50 @@ Follow these steps to deploy the local development environment.
 3.  **Environment Configuration**
     Create a `.env` file in the root directory:
     ```env
-    VITE_GEMINI_API_KEY=your_google_gemini_api_key
+    VITE_SUPABASE_URL=your_supabase_url
+    VITE_SUPABASE_PUBLISHABLE_KEY=your_supabase_anon_key
+    VITE_GROQ_API_KEY=your_gemini_or_groq_api_key
     ```
-    *(Note: Firebase configuration is currently embedded for demo ease-of-use. For production, update `src/integrations/firebase/config.ts`)*
 
-4.  **Launch Development Server**
+4.  **Database Setup (Important)**
+    To create the necessary tables, copy the SQL code from `supabase/migrations/20240129_initial_schema.sql` and run it in your **Supabase Dashboard > SQL Editor**.
+
+5.  **Launch Development Server**
     ```bash
     npm run dev
     ```
-    Access the application at `http://localhost:3000`.
+    Access the application at `http://localhost:5173`.
+
+---
+
+## 🌐 Deployment
+
+This project is optimized for deployment on **Vercel** or **Netlify**.
+
+### Build Settings
+- **Build Command**: `npm run build`
+- **Output Directory**: `dist`
+- **Install Command**: `npm install`
+
+### Environment Variables
+Ensure you add the `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`, and `VITE_GROQ_API_KEY` to your deployment provider's environment variable settings.
 
 ---
 
 ## 🎮 Demo Walkthrough
 
-The application demonstrates two distinct workflows:
-
 ### Scenario A: The Candidate
-1.  **Onboarding**: Log in and access the Candidate Dashboard.
-2.  **Profile Builder**: Upload a PDF resume. Watch Gemini analyze and populate your skills instantly.
-3.  **Validation**: Navigate to "Assessments" and take an AI-generated quiz to verify a specific skill.
-4.  **Discovery**: Browse the "Opportunities" tab to find recruiter outreach and relevant job postings.
-5.  **Action**: Apply to interested roles or register for suggested hackathons.
+1.  **Onboarding**: Log in via Google or Email.
+2.  **Profile Builder**: Upload a PDF resume. Watch AI analyze and populate your skills instantly.
+3.  **Validation**: Take an AI-generated quiz to verify a specific skill.
+4.  **Discovery**: Browse "Opportunities" to find recruiter outreach.
 
 ### Scenario B: The Recruiter
-1.  **Switch Role**: Log out and authenticate as a Recruiter.
-2.  **Talent Acquisition**: Browse the "Candidates" pool to find users with verified skills matching your needs.
-3.  **Job Management**: Navigate to "Job Roles" to create new listings with required skill sets and salary ranges.
-4.  **Organization**: Use "Settings" to customize your company profile and hiring preferences.
+1.  **Switch Role**: Log in as a Recruiter.
+2.  **Talent Acquisition**: Browse the "Candidates" pool to find users with verified skills.
+3.  **Job Management**: Post new job listings. these are saved to the database in real-time.
 
 ---
 
 ## 📄 License
-
 This project is open-source and created for educational purposes as part of the Fortex36 Hackathon.
