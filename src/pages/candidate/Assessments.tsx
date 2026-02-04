@@ -70,10 +70,9 @@ export default function Assessments() {
       setResult(null);
       setState('in-progress');
     } catch (error) {
-      console.error("Failed to generate quiz:", error);
       toast({
-        title: "Generation failed",
-        description: "Falling back to demo questions.",
+        title: "Failed to generate quiz",
+        description: error instanceof Error ? error.message : "Falling back to demo questions.",
         variant: "destructive"
       });
       // Fallback to mock data

@@ -22,7 +22,6 @@ export const processResume = async (file: File): Promise<ResumeResponse> => {
     });
 
     if (error) {
-      console.error('Edge function error:', error);
       return {
         success: false,
         error: error.message || 'Failed to process resume',
@@ -41,7 +40,6 @@ export const processResume = async (file: File): Promise<ResumeResponse> => {
       data: data.data as ResumeData,
     };
   } catch (error) {
-    console.error('Resume processing error:', error);
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Failed to process resume',

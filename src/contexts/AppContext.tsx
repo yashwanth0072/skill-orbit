@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { toast } from '@/hooks/use-toast';
+import { isValidSkillScore } from '@/lib/validation';
 import {
   Skill,
   Opportunity,
@@ -92,7 +93,7 @@ const loadPersistedSkills = (): Skill[] => {
       return JSON.parse(stored);
     }
   } catch (e) {
-    console.error('Failed to load persisted skills:', e);
+    // Failed to load persisted skills, return empty array
   }
   return [];
 };
@@ -105,7 +106,7 @@ const loadPersistedSettings = (): UserSettings => {
       return JSON.parse(stored);
     }
   } catch (e) {
-    console.error('Failed to load persisted settings:', e);
+    // Failed to load persisted settings, return defaults
   }
   return {
     reverseHiringEnabled: true,
@@ -146,7 +147,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
           }
         }
       } catch (e) {
-        console.error('Error during auth init:', e);
+        // Error during auth initialization - user will remain unauthenticated
       } finally {
         if (mounted) setIsLoading(false);
       }
@@ -178,10 +179,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
           };
 
           const { error } = await supabase.from('profiles').insert(newProfile);
-          if (!error) {
+          if (error) {
+            // Profile creation failed, but user is still authenticated
             setUserRole(storedRole);
           } else {
-            console.error('Error creating profile:', error);
+            setUserRole(storedRole);
           }
         }
       } else {
@@ -215,8 +217,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
           .from('job_roles')
           .select('*');
 
-        if (jobsError) console.error('Error fetching jobs:', jobsError);
-
         if (fetchedJobs) {
           const formattedJobs = fetchedJobs.map(job => ({
             ...job,
@@ -234,8 +234,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
             .from('candidate_skills')
             .select('*')
             .eq('user_id', user.id);
-
-          if (skillsError) console.error('Error fetching skills:', skillsError);
 
           if (fetchedSkills) {
             const mappedSkills = fetchedSkills.map(s => ({
@@ -259,8 +257,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
               job_role:job_roles (*)
             `);
 
-          if (appsError) console.error('Error fetching apps:', appsError);
-
           if (fetchedApps) {
             const mappedApps: JobApplication[] = fetchedApps.map(app => ({
               id: app.id,
@@ -280,7 +276,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
           }
         }
       } catch (error) {
-        console.error('Error loading Supabase data:', error);
+        // Error loading data from Supabase
       }
     };
 
@@ -307,6 +303,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
   };
 
   const updateSkillScore = (skillId: string, newScore: number) => {
+    // Validate score range
+    if (!isValidSkillScore(newScore)) {
+      toast({
+        title: 'Invalid score',
+        description: 'Skill score must be between 0 and 100',
+        variant: 'destructive'
+      });
+      return;
+    }
+
     setSkills((prev) =>
       prev.map((skill) =>
         skill.id === skillId
@@ -349,7 +355,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
           posted_at: jobRole.postedAt
         });
         if (error) {
-          console.error('Error adding job role to DB:', error);
           toast({
             title: 'Error saving job',
             description: error.message,
@@ -363,7 +368,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         }
       }
     } catch (e) {
-      console.error('Error in addJobRole:', e);
+      // Error adding job role
     }
   };
 
@@ -438,13 +443,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
           created_at: newApplication.createdAt
         });
         if (error) {
-          console.error("DB Apply Error", error);
           toast({ title: 'Application failed', variant: 'destructive' });
         } else {
           toast({ title: 'Application sent!' });
         }
       }
-    } catch (e) { console.error(e); }
+    } catch (e) {
+      // Error applying to job
+    }
 
     // Also create a "Candidate" record visible to recruiter immediately (Optimistic UI only for now)
     // In real App, Recruiter fetches this from DB via 'job_applications' table join

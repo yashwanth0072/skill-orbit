@@ -96,12 +96,12 @@ export default function CandidateDashboard() {
       {/* Job Application Notifications */}
       <JobApplicationNotifications />
       {/* Header */}
-      <motion.div variants={itemVariants} className="flex items-center justify-between">
+      <motion.div variants={itemVariants} className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="font-display text-3xl font-bold text-foreground">
+          <h1 className="font-display text-2xl sm:text-3xl font-bold text-foreground">
             {hasSkills ? 'Welcome Back!' : 'Get Started'}
           </h1>
-          <p className="text-muted-foreground mt-1">
+          <p className="text-muted-foreground mt-1 text-sm sm:text-base">
             {hasSkills
               ? "Here's your skill overview and latest opportunities."
               : 'Upload your resume to see your skill analysis and opportunities.'}
@@ -109,7 +109,7 @@ export default function CandidateDashboard() {
         </div>
         {hasSkills && (
           <Link to="/assessments">
-            <Button className="gap-2">
+            <Button className="gap-2" aria-label="Take skill assessment">
               <Target className="w-4 h-4" /> Take Assessment
             </Button>
           </Link>
@@ -130,7 +130,7 @@ export default function CandidateDashboard() {
 
       {/* Stats Grid - Only show after skills are loaded */}
       {hasSkills && (
-        <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <motion.div variants={itemVariants} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
           <Card className="gradient-card border-border">
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
@@ -205,7 +205,7 @@ export default function CandidateDashboard() {
       {/* Main Content Grid - Only show after skills are loaded */}
       {hasSkills && (
         <>
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
             {/* Skill Radar */}
             <motion.div variants={itemVariants}>
               <Card className="h-full">
@@ -303,7 +303,7 @@ export default function CandidateDashboard() {
                 <Calendar className="w-5 h-5 text-primary" />
               </CardHeader>
               <CardContent>
-                <div className="grid md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {upcomingEvents.map((event) => (
                     <div
                       key={event.id}

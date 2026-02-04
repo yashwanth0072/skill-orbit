@@ -76,6 +76,8 @@ export function Sidebar() {
           // Handle mobile slide via class if not using framer for everything
           !mobileOpen && 'max-md:-translate-x-full'
         )}
+        role="navigation"
+        aria-label="Sidebar navigation"
       >
         {/* Logo */}
         <div className="p-4 border-b border-border flex justify-between items-center">

@@ -7,6 +7,7 @@ import { useApp } from '@/contexts/AppContext';
 import { Orbit, User, Building2, ArrowRight } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
+import { isValidEmail, isValidPassword } from '@/lib/validation';
 
 export default function Auth() {
   const navigate = useNavigate();
@@ -21,6 +22,16 @@ export default function Auth() {
   const handleEmailSignIn = async () => {
     if (!selectedRole) {
       toast({ title: 'Please select a role first', variant: 'destructive' });
+      return;
+    }
+
+    if (!isValidEmail(email)) {
+      toast({ title: 'Please enter a valid email address', variant: 'destructive' });
+      return;
+    }
+
+    if (!isValidPassword(password)) {
+      toast({ title: 'Password must be at least 6 characters', variant: 'destructive' });
       return;
     }
 
@@ -48,6 +59,16 @@ export default function Auth() {
   const handleEmailSignUp = async () => {
     if (!selectedRole) {
       toast({ title: 'Please select a role first', variant: 'destructive' });
+      return;
+    }
+
+    if (!isValidEmail(email)) {
+      toast({ title: 'Please enter a valid email address', variant: 'destructive' });
+      return;
+    }
+
+    if (!isValidPassword(password)) {
+      toast({ title: 'Password must be at least 6 characters', variant: 'destructive' });
       return;
     }
 
@@ -106,7 +127,6 @@ export default function Auth() {
 
       // Note: User will be redirected to Google, so execution might pause/end here.
     } catch (err) {
-      console.error('Auth Error:', err);
       toast({
         title: 'Sign in failed',
         description: err instanceof Error ? err.message : 'An error occurred',
@@ -158,6 +178,8 @@ export default function Auth() {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => setSelectedRole('candidate')}
+              aria-label="Select candidate role"
+              aria-pressed={selectedRole === 'candidate'}
               className={`w-full p-5 rounded-xl border-2 transition-all text-left ${selectedRole === 'candidate'
                 ? 'border-primary bg-primary/5'
                 : 'border-border hover:border-primary/40 bg-card'
@@ -186,6 +208,8 @@ export default function Auth() {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => setSelectedRole('recruiter')}
+              aria-label="Select recruiter role"
+              aria-pressed={selectedRole === 'recruiter'}
               className={`w-full p-5 rounded-xl border-2 transition-all text-left ${selectedRole === 'recruiter'
                 ? 'border-primary bg-primary/5'
                 : 'border-border hover:border-primary/40 bg-card'
@@ -212,20 +236,32 @@ export default function Auth() {
 
             {/* Email Form */}
             <div className="space-y-3 pt-4 border-t border-border">
-              <input
-                type="email"
-                placeholder="Email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-              />
-              <input
-                type="password"
-                placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-              />
+              <div>
+                <label htmlFor="email" className="sr-only">Email address</label>
+                <input
+                  id="email"
+                  type="email"
+                  placeholder="Email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  aria-label="Email address"
+                  autoComplete="email"
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                />
+              </div>
+              <div>
+                <label htmlFor="password" className="sr-only">Password</label>
+                <input
+                  id="password"
+                  type="password"
+                  placeholder="Password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  aria-label="Password"
+                  autoComplete="current-password"
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                />
+              </div>
               <div className="flex gap-2">
                 <Button
                   onClick={handleEmailSignIn}

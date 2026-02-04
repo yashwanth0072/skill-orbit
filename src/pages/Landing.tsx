@@ -61,25 +61,25 @@ export default function Landing() {
   return (
     <div className="min-h-screen bg-background">
       {/* Navigation */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border">
-        <div className="max-w-7xl mx-auto px-6 py-4">
+      <nav aria-label="Main navigation" className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4">
           <div className="flex items-center justify-between">
-            <Link to="/" className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl gradient-primary flex items-center justify-center shadow-glow">
-                <Orbit className="w-6 h-6 text-primary-foreground" />
+            <Link to="/" className="flex items-center gap-2 sm:gap-3">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl gradient-primary flex items-center justify-center shadow-glow">
+                <Orbit className="w-5 h-5 sm:w-6 sm:h-6 text-primary-foreground" />
               </div>
-              <span className="font-display font-bold text-xl text-foreground">Skill Orbit</span>
+              <span className="font-display font-bold text-lg sm:text-xl text-foreground">Skill Orbit</span>
             </Link>
 
-            <div className="flex items-center gap-4">
-              <Button variant="ghost" onClick={() => handleRoleStart('candidate')}>
+            <div className="flex items-center gap-2 sm:gap-4">
+              <Button variant="ghost" onClick={() => handleRoleStart('candidate')} className="text-xs sm:text-sm px-2 sm:px-4">
                 For Candidates
               </Button>
-              <Button variant="ghost" onClick={() => handleRoleStart('recruiter')}>
+              <Button variant="ghost" onClick={() => handleRoleStart('recruiter')} className="text-xs sm:text-sm px-2 sm:px-4">
                 For Recruiters
               </Button>
-              <Button onClick={handleGetStarted} className="gap-2">
-                Get Started <ArrowRight className="w-4 h-4" />
+              <Button onClick={handleGetStarted} className="gap-1 sm:gap-2 text-xs sm:text-sm px-3 sm:px-4">
+                Get Started <ArrowRight className="w-3 h-3 sm:w-4 sm:h-4" />
               </Button>
             </div>
           </div>
@@ -87,10 +87,10 @@ export default function Landing() {
       </nav>
 
       {/* Hero Section */}
-      <section className="relative pt-32 pb-20 overflow-hidden">
+      <section className="relative pt-24 sm:pt-32 pb-16 sm:pb-20 overflow-hidden">
         {/* Background elements */}
         <div className="absolute inset-0 gradient-glow opacity-50" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] opacity-20">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] sm:w-[800px] h-[600px] sm:h-[800px] opacity-20">
           <motion.div
             animate={{ rotate: 360 }}
             transition={{ duration: 60, repeat: Infinity, ease: 'linear' }}
@@ -115,6 +115,8 @@ export default function Landing() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
               className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm font-medium mb-8"
+              role="status"
+              aria-label="Platform tagline"
             >
               <Sparkles className="w-4 h-4" />
               Reverse Recruitment, Reimagined
@@ -124,7 +126,7 @@ export default function Landing() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.1 }}
-              className="font-display text-5xl md:text-7xl font-bold text-foreground leading-tight mb-6"
+              className="font-display text-4xl sm:text-5xl md:text-7xl font-bold text-foreground leading-tight mb-6"
             >
               Your Skills,{' '}
               <span className="text-gradient-primary">Your Terms</span>
@@ -134,7 +136,7 @@ export default function Landing() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
-              className="text-xl text-muted-foreground mb-10 max-w-2xl mx-auto"
+              className="text-base sm:text-lg md:text-xl text-muted-foreground mb-8 sm:mb-10 max-w-2xl mx-auto px-4"
             >
               A consent-driven platform where your skills come first. Get assessed, understand your gaps,
               and get notified when you're eligible for roles—all on your terms.
@@ -144,22 +146,22 @@ export default function Landing() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.3 }}
-              className="flex flex-col sm:flex-row items-center justify-center gap-4"
+              className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 px-4"
             >
               <Button
                 size="lg"
                 onClick={() => handleRoleStart('candidate')}
-                className="px-8 py-6 text-lg gap-2"
+                className="w-full sm:w-auto px-6 sm:px-8 py-5 sm:py-6 text-base sm:text-lg gap-2"
               >
-                Start as Candidate <ArrowRight className="w-5 h-5" />
+                Start as Candidate <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" />
               </Button>
               <Button
                 variant="outline"
                 size="lg"
                 onClick={() => handleRoleStart('recruiter')}
-                className="px-8 py-6 text-lg gap-2"
+                className="w-full sm:w-auto px-6 sm:px-8 py-5 sm:py-6 text-base sm:text-lg gap-2"
               >
-                <Users className="w-5 h-5" /> I'm a Recruiter
+                <Users className="w-4 h-4 sm:w-5 sm:h-5" /> I'm a Recruiter
               </Button>
             </motion.div>
           </div>

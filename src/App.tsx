@@ -5,33 +5,41 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AppProvider, useApp } from "./contexts/AppContext";
 import { SidebarProvider } from "./contexts/SidebarContext";
+import ErrorBoundary from "./components/ErrorBoundary";
+import { Loader2 } from "lucide-react";
+import React, { Suspense, lazy } from "react";
 
-// Pages
-import Landing from "./pages/Landing";
-import Auth from "./pages/Auth";
-import NotFound from "./pages/NotFound";
+// Lazy load pages for better performance
+const Landing = lazy(() => import("./pages/Landing"));
+const Auth = lazy(() => import("./pages/Auth"));
+const NotFound = lazy(() => import("./pages/NotFound"));
 
 // Candidate Pages
-import CandidateDashboard from "./pages/candidate/Dashboard";
-import Assessments from "./pages/candidate/Assessments";
-import Opportunities from "./pages/candidate/Opportunities";
-import Events from "./pages/candidate/Events";
-import Progress from "./pages/candidate/Progress";
-import Settings from "./pages/candidate/Settings";
+const CandidateDashboard = lazy(() => import("./pages/candidate/Dashboard"));
+const Assessments = lazy(() => import("./pages/candidate/Assessments"));
+const Opportunities = lazy(() => import("./pages/candidate/Opportunities"));
+const Events = lazy(() => import("./pages/candidate/Events"));
+const Progress = lazy(() => import("./pages/candidate/Progress"));
+const Settings = lazy(() => import("./pages/candidate/Settings"));
 
 // Recruiter Pages
-import RecruiterDashboard from "./pages/recruiter/Dashboard";
-import Candidates from "./pages/recruiter/Candidates";
-import JobRoles from "./pages/recruiter/JobRoles";
-import RecruiterEvents from "./pages/recruiter/Events";
-import RecruiterSettings from "./pages/recruiter/Settings";
+const RecruiterDashboard = lazy(() => import("./pages/recruiter/Dashboard"));
+const Candidates = lazy(() => import("./pages/recruiter/Candidates"));
+const JobRoles = lazy(() => import("./pages/recruiter/JobRoles"));
+const RecruiterEvents = lazy(() => import("./pages/recruiter/Events"));
+const RecruiterSettings = lazy(() => import("./pages/recruiter/Settings"));
 
 // Layout
 import { DashboardLayout } from "./components/layout/DashboardLayout";
 
 const queryClient = new QueryClient();
 
-import { Loader2 } from "lucide-react";
+// Loading fallback component
+const PageLoader = () => (
+  <div className="flex items-center justify-center min-h-screen">
+    <Loader2 className="w-8 h-8 animate-spin text-primary" />
+  </div>
+);
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading } = useApp();
@@ -63,9 +71,10 @@ function AppRoutes() {
   }
 
   return (
-    <Routes>
-      {/* Public Routes */}
-      <Route
+    <Suspense fallback={<PageLoader />}>
+      <Routes>
+        {/* Public Routes */}
+        <Route
         path="/"
         element={
           isAuthenticated ? (
@@ -106,12 +115,13 @@ function AppRoutes() {
         <Route path="/recruiter/jobs" element={<JobRoles />} />
         <Route path="/recruiter/events" element={<RecruiterEvents />} />
         <Route path="/recruiter/candidates" element={<Candidates />} />
-        <Route path="/recruiter/settings" element={<Settings />} />
+        <Route path="/recruiter/settings" element={<RecruiterSettings />} />
       </Route>
 
       {/* Catch All */}
       <Route path="*" element={<NotFound />} />
     </Routes>
+    </Suspense>
   );
 }
 
@@ -119,13 +129,15 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <BrowserRouter>
-        <AppProvider>
-          <SidebarProvider>
-            <Toaster />
-            <Sonner />
-            <AppRoutes />
-          </SidebarProvider>
-        </AppProvider>
+        <ErrorBoundary>
+          <AppProvider>
+            <SidebarProvider>
+              <Toaster />
+              <Sonner />
+              <AppRoutes />
+            </SidebarProvider>
+          </AppProvider>
+        </ErrorBoundary>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
