@@ -1,6 +1,5 @@
 # Skill Orbit
 
-[![Live Demo](https://img.shields.io/badge/demo-live-brightgreen?style=for-the-badge)](https://skill-orbit-tau.vercel.app)
 [![React](https://img.shields.io/badge/React-18.3-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://reactjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.8-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Build](https://img.shields.io/badge/build-passing-success?style=for-the-badge)](https://github.com/)
@@ -18,14 +17,14 @@ Skill Orbit reimagines the recruitment process by inverting the traditional job 
 
 ## Demo Accounts
 
-To explore the platform without creating an account, use these test credentials:
+To explore the platform, you can use these test credentials when running locally:
 
 ### Candidate Account
 ```
 Email: candidate@skillorbit.demo
 Password: demo123456
 ```
-**Features to explore:**
+**Features:**
 - Upload and parse resume
 - Take skill assessments
 - View job matches and opportunities
@@ -37,14 +36,14 @@ Password: demo123456
 Email: recruiter@skillorbit.demo
 Password: demo123456
 ```
-**Features to explore:**
+**Features:**
 - Post job roles with skill requirements
 - Browse verified candidates
 - Send job opportunities to candidates
 - Track application responses
 - View hiring analytics
 
-> **Note:** Demo accounts are reset periodically and shared among users. For full functionality and data persistence, create your own account using email or Google OAuth.
+> **Setup:** Create these accounts in your Supabase Authentication dashboard with the credentials above.
 
 ## Architecture
 
@@ -215,16 +214,20 @@ npm run build      # Optimized for production
 npm run preview    # Preview production build locally
 ```
 
-**Deployment to Vercel**
-```bash
-# Install Vercel CLI
-npm i -g vercel
+**Deployment Options**
 
-# Deploy
-vercel --prod
+The application can be deployed to any modern hosting platform:
 
-# Set environment variables in Vercel dashboard
-```
+- **Vercel** - Optimized for Vite applications with automatic deployments
+- **Netlify** - Full support with environment variable configuration
+- **Docker** - Container deployment with custom configurations
+- **AWS** - S3 + CloudFront for static hosting
+- **Self-Hosted** - Deploy the `dist/` folder to any web server
+
+For environment variable setup during deployment, ensure the following are configured:
+- `VITE_SUPABASE_URL`
+- `VITE_SUPABASE_PUBLISHABLE_KEY`
+- `VITE_GROQ_API_KEY`
 
 ## Project Structure
 
@@ -470,7 +473,7 @@ npm run lint
 
 ## License
 
-This project is part of a hackathon submission and is available for educational purposes. For commercial use, please contact the maintainers.
+This project was developed as a submission for the **fortex36 Hackathon 2026** and is available for educational purposes. For commercial use, please contact the maintainers.
 
 ## Acknowledgments
 
@@ -486,11 +489,7 @@ Built with modern web technologies:
 
 - **Issues:** [GitHub Issues](https://github.com/yourusername/skill-orbit/issues)
 - **Documentation:** [Wiki](https://github.com/yourusername/skill-orbit/wiki)
-- **Live Demo:** [https://skill-orbit-tau.vercel.app](https://skill-orbit-tau.vercel.app)
 
 ---
 
-**Developed for the Hackathon 2026** | [Documentation](./CODE_IMPROVEMENTS.md) | [Changelog](./CHANGELOG.md)
----
-
-**Developed for Hackathon 2026** | [Documentation](./CODE_IMPROVEMENTS.md) | [Changelog](./CHANGELOG.md)
+**Developed for fortex36 Hackathon 2026** | [Technical Documentation](./CODE_IMPROVEMENTS.md)
